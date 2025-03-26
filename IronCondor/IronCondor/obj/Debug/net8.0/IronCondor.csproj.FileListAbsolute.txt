@@ -1,0 +1,17 @@
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\bin\Debug\net8.0\IronCondor.exe
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\bin\Debug\net8.0\IronCondor.deps.json
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\bin\Debug\net8.0\IronCondor.runtimeconfig.json
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\bin\Debug\net8.0\IronCondor.dll
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\bin\Debug\net8.0\IronCondor.pdb
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\bin\Debug\net8.0\CSharpAPI.dll
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.csproj.AssemblyReference.cache
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.AssemblyInfoInputs.cache
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.AssemblyInfo.cs
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.csproj.CoreCompileInputs.cache
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.csproj.Up2Date
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.dll
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\refint\IronCondor.dll
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.pdb
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\IronCondor.genruntimeconfig.cache
+C:\Users\GH20880\source\repos\IronCondor\IronCondor\obj\Debug\net8.0\ref\IronCondor.dll
