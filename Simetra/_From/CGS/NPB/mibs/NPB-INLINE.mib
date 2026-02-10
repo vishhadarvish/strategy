@@ -1,0 +1,204 @@
+NPB-INLINE DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+inlineMib MODULE-IDENTITY
+    LAST-UPDATED "201611220000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201611220000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 7 }
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+InlineToolFailoverAction ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {nw-bypass(0),nw-drop(1),nw-down(2),tool-bypass(3),tool-drop(4)}
+
+InlineToolchainFailoverAction ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {nw-bypass(0),nw-drop(1),nw-down(2),per-tool(5)}
+
+Capabilities ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {max-num-of-tools(64),max-num-of-toolchains(65)}
+
+InlineLbGroupFailoverAction ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {nw-bypass(0),nw-drop(1),nw-down(2),per-tool(5),lb-bypass(6),lb-drop(7)}
+
+-- Inline tools
+inline OBJECT IDENTIFIER ::= { inlineMib 1 }
+
+inlineToolTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF InlineToolEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "inline tool configuration"
+    ::= { inline 1 }
+
+inlineToolEntry OBJECT-TYPE
+    SYNTAX      InlineToolEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED inlineToolName }
+        ::= { inlineToolTable 1 }
+
+InlineToolEntry ::=
+    SEQUENCE {
+        inlineToolName String,
+        inlineToolDescription String,
+        inlineToolPortA String,
+        inlineToolPortB String,
+        inlineToolFailoverAction InlineToolFailoverAction,
+        inlineToolHeartbeatProfile String,
+        inlineToolStatus String,
+        inlineToolRowstatus RowStatus
+    }
+
+inlineToolName OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 48))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { inlineToolEntry 1 }
+
+inlineToolDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inline tool description"
+    ::= { inlineToolEntry 2 }
+
+inlineToolPortA OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port id leading to inline tool side A"
+    ::= { inlineToolEntry 3 }
+
+inlineToolPortB OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port id led from inline tool side B"
+    ::= { inlineToolEntry 4 }
+
+inlineToolFailoverAction OBJECT-TYPE
+    SYNTAX      InlineToolFailoverAction
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Failover action on hb-profile failure"
+    DEFVAL { tool-bypass }
+    ::= { inlineToolEntry 5 }
+
+inlineToolHeartbeatProfile OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Heartbeat profile name"
+    ::= { inlineToolEntry 6 }
+
+inlineToolStatus OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Display inline tool status"
+    ::= { inlineToolEntry 7 }
+
+inlineToolRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { inlineToolEntry 8 }
+
+inlineToolchainTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF InlineToolchainEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "inline toolchain configuration"
+    ::= { inline 2 }
+
+inlineToolchainEntry OBJECT-TYPE
+    SYNTAX      InlineToolchainEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED inlineToolchainName }
+        ::= { inlineToolchainTable 1 }
+
+InlineToolchainEntry ::=
+    SEQUENCE {
+        inlineToolchainName String,
+        inlineToolchainDescription String,
+        inlineToolchainTools String,
+        inlineToolchainFailoverAction InlineToolchainFailoverAction,
+        inlineToolchainStatus String,
+        inlineToolchainRowstatus RowStatus
+    }
+
+inlineToolchainName OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 48))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { inlineToolchainEntry 1 }
+
+inlineToolchainDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inline toolchain description"
+    ::= { inlineToolchainEntry 2 }
+
+inlineToolchainTools OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 3140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of inline tools names"
+    ::= { inlineToolchainEntry 3 }
+
+inlineToolchainFailoverAction OBJECT-TYPE
+    SYNTAX      InlineToolchainFailoverAction
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Failover action on inline-tool failure"
+    DEFVAL { per-tool }
+    ::= { inlineToolchainEntry 4 }
+
+inlineToolchainStatus OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Display inline toolchain status"
+    ::= { inlineToolchainEntry 5 }
+
+inlineToolchainRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { inlineToolchainEntry 6 }
+
+END

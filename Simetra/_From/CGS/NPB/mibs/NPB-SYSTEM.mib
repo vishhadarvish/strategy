@@ -1,0 +1,1990 @@
+NPB-SYSTEM DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    Ipv6Address
+        FROM IPV6-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+systemMib MODULE-IDENTITY
+    LAST-UPDATED "201512290000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201512290000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 1 }
+
+UnsignedByte ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION "xs:unsignedByte"
+    SYNTAX      Unsigned32 (0 .. 255)
+
+UnsignedShort ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION "xs:unsignedShort"
+    SYNTAX      Unsigned32 (0 .. 65535)
+
+ConfdString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs: and confd: types mapped to strings"
+    SYNTAX      OCTET STRING
+
+InetAddressIP ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "confd:inetAddressIP"
+    SYNTAX      OCTET STRING (SIZE (4|16))
+
+IpPrefix ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "confd:ipPrefix"
+    SYNTAX      OCTET STRING (SIZE (5|17))
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+HexList ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1x:"
+    STATUS      current
+    DESCRIPTION "confd:hexList"
+    SYNTAX      OCTET STRING
+
+AaaName ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING (SIZE (0 .. 255))
+
+AaaPassword ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+AclName ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "ACL name"
+    SYNTAX      OCTET STRING (SIZE (0 .. 32))
+
+AlarmContext ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {cli(0),webui(1),snmp(2),netconf(3)}
+
+AlarmModule ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {port(0),filter(1),hw(2),recovery(3),powerup(4),system(5),lb(6),ha(7),inline(8)}
+
+AlarmSeverity ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {info(0),minor(1),major(2),critical(3)}
+
+AlarmManagerStatus ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {open(0),close(1),event(2)}
+
+AuthAccess ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {read-only(1),read-write(2)}
+
+AuthProtocol ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {none(0),md5(1),sha(2)}
+
+AuthprivPass ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+ConfigLocalFile ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING (SIZE (0 .. 255))
+
+ConsolePortBaudrate ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+KeyDigest ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {md5(0),sha(1),sha1(2),none(3)}
+
+LedControlOper ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {off(0),on(1)}
+
+LocalFile ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "Local file name"
+    SYNTAX      OCTET STRING (SIZE (0 .. 255))
+
+MgmtPortSpeed ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {na(0),speed10M(10),speed100M(100),speed1G(1000),speed10G(10000)}
+
+MgmtPortSpeedConfigAll ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Possible speed configuration in Mbps, for ethernet managament port"
+    SYNTAX      INTEGER {speed10M(10),speed100M(100),speed1000M(1000),auto(9999)}
+
+MgmtPortSpeedConfig ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {speed10M(10),speed100M(100),speed1000M(1000),auto(9999)}
+
+PortDuplex ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {unknown(0),half(1),full(2)}
+
+PortDuplexConfig ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "duplex setting ;; full half auto "
+    SYNTAX      OCTET STRING (SIZE (0 .. 8))
+
+PrivProtocol ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {none(0),des(1),aes-128(2)}
+
+PsuOverType ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {notExist(-1),normal(0),overHeat(1)}
+
+RemoteAuthentication ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {radius(0),tacacs(1)}
+
+RemoteUrl ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "Remote URL"
+    SYNTAX      OCTET STRING (SIZE (0 .. 1024))
+
+StatusType ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {na(-1),fail(0),good(1)}
+
+SwBootBank ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {bank-a(0),bank-b(1)}
+
+SwUpgradeProgress ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (0 .. 100)
+
+SwUpgradeStatus ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {not-started(0),downloading(1),downloading-failed(2),verifying(3),verify-failed(4),burn-in-progress(5),burn-failed(6),canceling(7),stopped(8),succeed(9)}
+
+SyslogActionType ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Action types"
+    SYNTAX      INTEGER {local-file(0),local-user(1),remote-machine(2)}
+
+SyslogClientFacility ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Syslog facilities, e.g. mail, user"
+    SYNTAX      INTEGER {user(8),auth(32),authpriv(80),local0(128),local1(136),local2(144),local3(152),local4(160),local5(168),local6(176),local7(184)}
+
+SyslogClientSeverity ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Syslog severity, e.g. warning, info"
+    SYNTAX      INTEGER {emerg(0),alert(1),crit(2),err(3),warning(4),notice(5),info(6),debug(7)}
+
+SyslogComparison ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Comparision types"
+    SYNTAX      INTEGER {sameOrHigher(0),same(1)}
+
+SyslogFacility ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Syslog facilities, e.g. mail, user, all"
+    SYNTAX      INTEGER {auth(0),authpriv(1),cron(2),daemon(3),ftp(4),kern(5),lpr(6),mail(7),news(8),security(9),syslog(10),user(11),uucp(12),local0(13),local1(14),local2(15),local3(16),local4(17),local5(18),local6(19),local7(20),all(21)}
+
+SyslogPriority ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "Syslog priority, e.g. warning, info, all"
+    SYNTAX      INTEGER {emerg(0),alert(1),crit(2),err(3),warning(4),notice(5),info(6),debug(7),none(8),all(9)}
+
+SyslogTransport ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {udp(0),tcp(1),relp(2)}
+
+TimeAndDateSource ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {local-config(1),ntp-server(2)}
+
+TrapVer ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {v2c-trap(1),v3-trap(4)}
+
+Username ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "User name"
+    SYNTAX      OCTET STRING (SIZE (0 .. 255))
+
+Direction ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {bToF(0),fToB(1),none(2)}
+
+Authentication ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {none(0),symmetric-keys(1)}
+
+Timezone ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {africa-abidjan(0),africa-accra(1),africa-addisAbaba(2),africa-algiers(3),africa-asmara(4),africa-asmera(5),africa-bamako(6),africa-bangui(7),africa-banjul(8),africa-bissau(9),africa-blantyre(10),africa-brazzaville(11),africa-bujumbura(12),africa-cairo(13),africa-casablanca(14),africa-ceuta(15),africa-conakry(16),africa-dakar(17),africa-darEsSalaam(18),africa-djibouti(19),africa-douala(20),africa-elAaiun(21),africa-freetown(22),africa-gaborone(23),africa-harare(24),africa-johannesburg(25),africa-juba(26),africa-kampala(27),africa-khartoum(28),africa-kigali(29),africa-kinshasa(30),africa-lagos(31),africa-libreville(32),africa-lome(33),africa-luanda(34),africa-lubumbashi(35),africa-lusaka(36),africa-malabo(37),africa-maputo(38),africa-maseru(39),africa-mbabane(40),africa-mogadishu(41),africa-monrovia(42),africa-nairobi(43),africa-ndjamena(44),africa-niamey(45),africa-nouakchott(46),africa-ouagadougou(47),africa-Porto-novo(48),africa-saoTome(49),africa-timbuktu(50),africa-tripoli(51),africa-tunis(52),africa-windhoek(53),america-adak(54),america-anchorage(55),america-anguilla(56),america-antigua(57),america-araguaina(58),america-Argentina-buenosAires(59),america-Argentina-catamarca(60),america-Argentina-comodRivadavia(61),america-Argentina-cordoba(62),america-Argentina-jujuy(63),america-Argentina-laRioja(64),america-Argentina-mendoza(65),america-Argentina-rioGallegos(66),america-Argentina-salta(67),america-Argentina-sanJuan(68),america-Argentina-sanLuis(69),america-Argentina-tucuman(70),america-Argentina-ushuaia(71),america-aruba(72),america-asuncion(73),america-atikokan(74),america-atka(75),america-bahia(76),america-bahiaBanderas(77),america-barbados(78),america-belem(79),america-belize(80),america-Blanc-sablon(81),america-boaVista(82),america-bogota(83),america-boise(84),america-buenosAires(85),america-cambridgeBay(86),america-campoGrande(87),america-cancun(88),america-caracas(89),america-catamarca(90),america-cayenne(91),america-cayman(92),america-chicago(93),america-chihuahua(94),america-coralHarbour(95),america-cordoba(96),america-costaRica(97),america-creston(98),america-cuiaba(99),america-curacao(100),america-danmarkshavn(101),america-dawson(102),america-dawsonCreek(103),america-denver(104),america-detroit(105),america-dominica(106),america-edmonton(107),america-eirunepe(108),america-elSalvador(109),america-ensenada(110),america-fortNelson(111),america-fortWayne(112),america-fortaleza(113),america-glaceBay(114),america-godthab(115),america-gooseBay(116),america-grandTurk(117),america-grenada(118),america-guadeloupe(119),america-guatemala(120),america-guayaquil(121),america-guyana(122),america-halifax(123),america-havana(124),america-hermosillo(125),america-Indiana-indianapolis(126),america-Indiana-knox(127),america-Indiana-marengo(128),america-Indiana-petersburg(129),america-Indiana-tellCity(130),america-Indiana-vevay(131),america-Indiana-vincennes(132),america-Indiana-winamac(133),america-indianapolis(134),america-inuvik(135),america-iqaluit(136),america-jamaica(137),america-jujuy(138),america-juneau(139),america-Kentucky-louisville(140),america-Kentucky-monticello(141),america-knoxIN(142),america-kralendijk(143),america-laPaz(144),america-lima(145),america-losAngeles(146),america-louisville(147),america-lowerPrinces(148),america-maceio(149),america-managua(150),america-manaus(151),america-marigot(152),america-martinique(153),america-matamoros(154),america-mazatlan(155),america-mendoza(156),america-menominee(157),america-merida(158),america-metlakatla(159),america-mexicoCity(160),america-miquelon(161),america-moncton(162),america-monterrey(163),america-montevideo(164),america-montreal(165),america-montserrat(166),america-nassau(167),america-newYork(168),america-nipigon(169),america-nome(170),america-noronha(171),america-NorthDakota-beulah(172),america-NorthDakota-center(173),america-NorthDakota-newSalem(174),america-ojinaga(175),america-panama(176),america-pangnirtung(177),america-paramaribo(178),america-phoenix(179),america-Port-au-prince(180),america-portofSpain(181),america-portoAcre(182),america-portoVelho(183),america-puertoRico(184),america-rainyRiver(185),america-rankinInlet(186),america-recife(187),america-regina(188),america-resolute(189),america-rioBranco(190),america-rosario(191),america-santaIsabel(192),america-santarem(193),america-santiago(194),america-santoDomingo(195),america-saoPaulo(196),america-scoresbysund(197),america-shiprock(198),america-sitka(199),america-stBarthelemy(200),america-stJohns(201),america-stKitts(202),america-stLucia(203),america-stThomas(204),america-stVincent(205),america-swiftCurrent(206),america-tegucigalpa(207),america-thule(208),america-thunderBay(209),america-tijuana(210),america-toronto(211),america-tortola(212),america-vancouver(213),america-virgin(214),america-whitehorse(215),america-winnipeg(216),america-yakutat(217),america-yellowknife(218),antarctica-casey(219),antarctica-davis(220),antarctica-dumontDUrville(221),antarctica-macquarie(222),antarctica-mawson(223),antarctica-mcMurdo(224),antarctica-palmer(225),antarctica-rothera(226),antarctica-southPole(227),antarctica-syowa(228),antarctica-troll(229),antarctica-vostok(230),arctic-longyearbyen(231),asia-aden(232),asia-almaty(233),asia-amman(234),asia-anadyr(235),asia-aqtau(236),asia-aqtobe(237),asia-ashgabat(238),asia-ashkhabad(239),asia-baghdad(240),asia-bahrain(241),asia-baku(242),asia-bangkok(243),asia-beirut(244),asia-bishkek(245),asia-brunei(246),asia-calcutta(247),asia-chita(248),asia-choibalsan(249),asia-chongqing(250),asia-chungking(251),asia-colombo(252),asia-dacca(253),asia-damascus(254),asia-dhaka(255),asia-dili(256),asia-dubai(257),asia-dushanbe(258),asia-gaza(259),asia-harbin(260),asia-hebron(261),asia-hoChiMinh(262),asia-hongKong(263),asia-hovd(264),asia-irkutsk(265),asia-istanbul(266),asia-jakarta(267),asia-jayapura(268),asia-jerusalem(269),asia-kabul(270),asia-kamchatka(271),asia-karachi(272),asia-kashgar(273),asia-kathmandu(274),asia-katmandu(275),asia-khandyga(276),asia-kolkata(277),asia-krasnoyarsk(278),asia-kualaLumpur(279),asia-kuching(280),asia-kuwait(281),asia-macao(282),asia-macau(283),asia-magadan(284),asia-makassar(285),asia-manila(286),asia-muscat(287),asia-nicosia(288),asia-novokuznetsk(289),asia-novosibirsk(290),asia-omsk(291),asia-oral(292),asia-phnomPenh(293),asia-pontianak(294),asia-pyongyang(295),asia-qatar(296),asia-qyzylorda(297),asia-rangoon(298),asia-riyadh(299),asia-saigon(300),asia-sakhalin(301),asia-samarkand(302),asia-seoul(303),asia-shanghai(304),asia-singapore(305),asia-srednekolymsk(306),asia-taipei(307),asia-tashkent(308),asia-tbilisi(309),asia-tehran(310),asia-telAviv(311),asia-thimbu(312),asia-thimphu(313),asia-tokyo(314),asia-ujungPandang(315),asia-ulaanbaatar(316),asia-ulanBator(317),asia-urumqi(318),asia-Ust-nera(319),asia-vientiane(320),asia-vladivostok(321),asia-yakutsk(322),asia-yekaterinburg(323),asia-yerevan(324),atlantic-azores(325),atlantic-bermuda(326),atlantic-canary(327),atlantic-capeVerde(328),atlantic-faeroe(329),atlantic-faroe(330),atlantic-janMayen(331),atlantic-madeira(332),atlantic-reykjavik(333),atlantic-southGeorgia(334),atlantic-stHelena(335),atlantic-stanley(336),australia-aCT(337),australia-adelaide(338),australia-brisbane(339),australia-brokenHill(340),australia-canberra(341),australia-currie(342),australia-darwin(343),australia-eucla(344),australia-hobart(345),australia-lHI(346),australia-lindeman(347),australia-lordHowe(348),australia-melbourne(349),australia-nSW(350),australia-north(351),australia-perth(352),australia-queensland(353),australia-south(354),australia-sydney(355),australia-tasmania(356),australia-victoria(357),australia-west(358),australia-yancowinna(359),brazil-acre(360),brazil-deNoronha(361),brazil-east(362),brazil-west(363),cET(364),cST6CDT(365),canada-atlantic(366),canada-central(367),canada-East-saskatchewan(368),canada-eastern(369),canada-mountain(370),canada-newfoundland(371),canada-pacific(372),canada-saskatchewan(373),canada-yukon(374),chile-continental(375),chile-easterIsland(376),cuba(377),eet(378),est(379),est5edt(380),egypt(381),eire(382),etc-GMT(383),etc-GMT-plus0(384),etc-GMT-plus1(385),etc-GMT-plus10(386),etc-GMT-plus11(387),etc-GMT-plus12(388),etc-GMT-plus2(389),etc-GMT-plus3(390),etc-GMT-plus4(391),etc-GMT-plus5(392),etc-GMT-plus6(393),etc-GMT-plus7(394),etc-GMT-plus8(395),etc-GMT-plus9(396),etc-GMT-minus0(397),etc-GMT-minus1(398),etc-GMT-minus10(399),etc-GMT-minus11(400),etc-GMT-minus12(401),etc-GMT-minus13(402),etc-GMT-minus14(403),etc-GMT-minus2(404),etc-GMT-minus3(405),etc-GMT-minus4(406),etc-GMT-minus5(407),etc-GMT-minus6(408),etc-GMT-minus7(409),etc-GMT-minus8(410),etc-GMT-minus9(411),etc-GMT0(412),etc-greenwich(413),etc-uct(414),etc-utc(415),etc-universal(416),etc-zulu(417),europe-amsterdam(418),europe-andorra(419),europe-athens(420),europe-belfast(421),europe-belgrade(422),europe-berlin(423),europe-bratislava(424),europe-brussels(425),europe-bucharest(426),europe-budapest(427),europe-busingen(428),europe-chisinau(429),europe-copenhagen(430),europe-dublin(431),europe-gibraltar(432),europe-guernsey(433),europe-helsinki(434),europe-isleOfMan(435),europe-istanbul(436),europe-jersey(437),europe-kaliningrad(438),europe-kiev(439),europe-lisbon(440),europe-ljubljana(441),europe-london(442),europe-luxembourg(443),europe-madrid(444),europe-malta(445),europe-mariehamn(446),europe-minsk(447),europe-monaco(448),europe-moscow(449),europe-nicosia(450),europe-oslo(451),europe-paris(452),europe-podgorica(453),europe-prague(454),europe-riga(455),europe-rome(456),europe-samara(457),europe-sanMarino(458),europe-sarajevo(459),europe-simferopol(460),europe-skopje(461),europe-sofia(462),europe-stockholm(463),europe-tallinn(464),europe-tirane(465),europe-tiraspol(466),europe-uzhgorod(467),europe-vaduz(468),europe-vatican(469),europe-vienna(470),europe-vilnius(471),europe-volgograd(472),europe-warsaw(473),europe-zagreb(474),europe-zaporozhye(475),europe-zurich(476),factory(477),gb(478),gb-eire(479),gmt(480),gmt-plus0(481),gmt-minus0(482),gmt0(483),greenwich(484),hst(485),hongkong(486),iceland(487),indian-antananarivo(488),indian-chagos(489),indian-christmas(490),indian-cocos(491),indian-comoro(492),indian-kerguelen(493),indian-mahe(494),indian-maldives(495),indian-mauritius(496),indian-mayotte(497),indian-reunion(498),iran(499),israel(500),jamaica(501),japan(502),kwajalein(503),libya(504),met(505),mst(506),mst7mdt(507),mexico-bajaNorte(508),mexico-bajaSur(509),mexico-general(510),nz(511),nz-chat(512),navajo(513),prc(514),pst8pdt(515),pacific-apia(516),pacific-auckland(517),pacific-bougainville(518),pacific-chatham(519),pacific-chuuk(520),pacific-easter(521),pacific-efate(522),pacific-enderbury(523),pacific-fakaofo(524),pacific-fiji(525),pacific-funafuti(526),pacific-galapagos(527),pacific-gambier(528),pacific-guadalcanal(529),pacific-guam(530),pacific-honolulu(531),pacific-johnston(532),pacific-kiritimati(533),pacific-kosrae(534),pacific-kwajalein(535),pacific-majuro(536),pacific-marquesas(537),pacific-midway(538),pacific-nauru(539),pacific-niue(540),pacific-norfolk(541),pacific-noumea(542),pacific-pagoPago(543),pacific-palau(544),pacific-pitcairn(545),pacific-pohnpei(546),pacific-ponape(547),pacific-portMoresby(548),pacific-rarotonga(549),pacific-saipan(550),pacific-samoa(551),pacific-tahiti(552),pacific-tarawa(553),pacific-tongatapu(554),pacific-truk(555),pacific-wake(556),pacific-wallis(557),pacific-yap(558),poland(559),portugal(560),roc(561),rok(562),singapore(563),systemV-aST4(564),systemV-aST4ADT(565),systemV-cST6(566),systemV-cST6CDT(567),systemV-eST5(568),systemV-eST5EDT(569),systemV-hST10(570),systemV-mST7(571),systemV-mST7MDT(572),systemV-pST8(573),systemV-pST8PDT(574),systemV-yST9(575),systemV-yST9YDT(576),turkey(577),uct(578),uS-alaska(579),uS-aleutian(580),uS-arizona(581),uS-central(582),uS-East-indiana(583),uS-eastern(584),uS-hawaii(585),uS-Indiana-starke(586),uS-michigan(587),uS-mountain(588),uS-pacific(589),uS-Pacific-new(590),uS-samoa(591),utc(592),universal(593),w-su(594),wet(595),zulu(596)}
+
+Group ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {admin(1),oper(2),read-only(3)}
+
+Password ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "Password"
+    SYNTAX      OCTET STRING
+
+-- System related settings
+system OBJECT IDENTIFIER ::= { systemMib 1 }
+
+-- Control hw features
+systemHw OBJECT IDENTIFIER ::= { system 1 }
+
+systemHwLocationLed OBJECT-TYPE
+    SYNTAX      LedControlOper
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Control location LED operation"
+    ::= { systemHw 1 }
+
+-- Configuration files actions
+systemConfigFiles OBJECT IDENTIFIER ::= { system 2 }
+
+-- System log level
+systemLog OBJECT IDENTIFIER ::= { system 3 }
+
+systemLogLevel OBJECT-TYPE
+    SYNTAX      INTEGER {normal(0),debug(1)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "System log level"
+    ::= { systemLog 1 }
+
+-- AAA settings
+systemAaa OBJECT IDENTIFIER ::= { system 4 }
+
+systemAaaBlockDormant OBJECT-TYPE
+    SYNTAX      Unsigned32 (1 .. 1000)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Block users that were not successfully logged in for a given number of days"
+    ::= { systemAaa 1 }
+
+systemNpb2e OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "NPB-IIe"
+    ::= { system 5 }
+
+-- Alarm operations
+systemAlarms OBJECT IDENTIFIER ::= { system 6 }
+
+-- Syslog alarm settings
+systemAlarmsSyslog OBJECT IDENTIFIER ::= { systemAlarms 1 }
+
+systemAlarmsSyslogEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Syslog alarm status"
+    ::= { systemAlarmsSyslog 1 }
+
+-- Trap alarm settings
+systemAlarmsTrap OBJECT IDENTIFIER ::= { systemAlarms 2 }
+
+systemAlarmsTrapEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Trap alarm status"
+    ::= { systemAlarmsTrap 1 }
+
+-- System security
+systemSecurity OBJECT IDENTIFIER ::= { system 7 }
+
+systemSecurityBlockIncomingPing OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Block incoming ICMP ECHO_REQUEST"
+    ::= { systemSecurity 1 }
+
+-- Syslog settings
+systemSyslog OBJECT IDENTIFIER ::= { system 8 }
+
+-- Time and date settings
+systemTimeAndDate OBJECT IDENTIFIER ::= { system 9 }
+
+systemTimeAndDateCurrentTimeAndDate OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Setting manually current time and date"
+    ::= { systemTimeAndDate 1 }
+
+systemTimeAndDateShowTime OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current time in format: HH:MM:SS"
+    ::= { systemTimeAndDate 2 }
+
+systemTimeAndDateShowDate OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current date in format: MM/DD/YY"
+    ::= { systemTimeAndDate 3 }
+
+systemTimeAndDateTimeZone OBJECT-TYPE
+    SYNTAX      Timezone
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Set the time zone for the device"
+    ::= { systemTimeAndDate 4 }
+
+-- NTP servers settings
+systemTimeAndDateNtp OBJECT IDENTIFIER ::= { systemTimeAndDate 5 }
+
+systemTimeAndDateNtpAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "NTP admin status"
+    ::= { systemTimeAndDateNtp 1 }
+
+systemTimeAndDateNtpNtpStatusAsString OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 512))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemTimeAndDateNtp 2 }
+
+-- Console port information
+systemConsolePort OBJECT IDENTIFIER ::= { system 10 }
+
+systemConsolePortCurrentBaudrate OBJECT-TYPE
+    SYNTAX      ConsolePortBaudrate
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current console port baudrate"
+    ::= { systemConsolePort 1 }
+
+-- User authentication settings
+systemUserMgmt OBJECT IDENTIFIER ::= { system 11 }
+
+systemUserMgmtAuthOrder OBJECT-TYPE
+    SYNTAX      INTEGER {local-first(0),remote-first(1)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Authentication order"
+    ::= { systemUserMgmt 1 }
+
+-- Tacacs configuration
+systemUserMgmtTacacs OBJECT IDENTIFIER ::= { systemUserMgmt 2 }
+
+systemUserMgmtTacacsAdminPrivLevel OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Admin group privilege level"
+    ::= { systemUserMgmtTacacs 1 }
+
+systemUserMgmtTacacsOperPrivLevel OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Oper group privilege level"
+    ::= { systemUserMgmtTacacs 2 }
+
+systemUserMgmtTacacsReadOnlyPrivLevel OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Read-only group privilege level"
+    ::= { systemUserMgmtTacacs 3 }
+
+-- Display system details
+systemDetails OBJECT IDENTIFIER ::= { system 12 }
+
+systemDetailsModelName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device model name"
+    ::= { systemDetails 1 }
+
+systemDetailsSerialNumber OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device serial number"
+    ::= { systemDetails 2 }
+
+systemDetailsSwVersion OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device software version"
+    ::= { systemDetails 3 }
+
+systemDetailsHwVersion OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device hardware version"
+    ::= { systemDetails 4 }
+
+systemDetailsSwitchName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Switch model name"
+    ::= { systemDetails 5 }
+
+systemDetailsSwitchVersion OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Switch version used by the device"
+    ::= { systemDetails 6 }
+
+systemDetailsCpuType OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 64))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "CPU type and version"
+    ::= { systemDetails 7 }
+
+systemDetailsHostname OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Device host name"
+    ::= { systemDetails 8 }
+
+systemDetailsHostnameDefault OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemDetails 9 }
+
+systemDetailsDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Device description"
+    ::= { systemDetails 10 }
+
+systemDetailsDeviceHostname OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device host name"
+    ::= { systemDetails 11 }
+
+systemDetailsSysUptime OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device system uptime"
+    ::= { systemDetails 12 }
+
+systemDetailsAppUptime OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Device application uptime"
+    ::= { systemDetails 13 }
+
+-- Status of the HW components
+systemHwStatus OBJECT IDENTIFIER ::= { system 13 }
+
+-- Software upgrade setting and activation
+systemSwUpgrade OBJECT IDENTIFIER ::= { system 14 }
+
+systemSwUpgradeStatus OBJECT IDENTIFIER ::= { systemSwUpgrade 1 }
+
+systemSwUpgradeStatusBootBankCur OBJECT-TYPE
+    SYNTAX      SwBootBank
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The bank the device will boot from on next reboot"
+    ::= { systemSwUpgradeStatus 1 }
+
+systemSwUpgradeStatusActiveBootBank OBJECT-TYPE
+    SYNTAX      SwBootBank
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The bank the device actualy booted from, upgrading image will be done to the alternate bank"
+    ::= { systemSwUpgradeStatus 2 }
+
+systemSwUpgradeStatusActiveSwVersion OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The SW version the device actualy booted from"
+    ::= { systemSwUpgradeStatus 3 }
+
+systemSwUpgradeStatusActiveSwImageFile OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The SW image file used in last|current software upgrade process"
+    ::= { systemSwUpgradeStatus 4 }
+
+systemSwUpgradeStatusUpgradeStatus OBJECT-TYPE
+    SYNTAX      SwUpgradeStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Status of last|current software upgrade process"
+    ::= { systemSwUpgradeStatus 5 }
+
+systemSwUpgradeStatusDownloadProgess OBJECT-TYPE
+    SYNTAX      SwUpgradeProgress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Progress of current software image download upgrade process in percentage"
+    ::= { systemSwUpgradeStatus 6 }
+
+systemSwUpgradeStatusErrorMessage OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Detailed error message of last upgrade operation"
+    ::= { systemSwUpgradeStatus 7 }
+
+-- Status of software in boot BankA
+systemSwUpgradeStatusSwBankA OBJECT IDENTIFIER ::= { systemSwUpgradeStatus 8 }
+
+systemSwUpgradeStatusSwBankABank OBJECT-TYPE
+    SYNTAX      SwBootBank
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankA 1 }
+
+systemSwUpgradeStatusSwBankASwVersion OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankA 2 }
+
+systemSwUpgradeStatusSwBankASwImageFile OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankA 3 }
+
+systemSwUpgradeStatusSwBankAStatus OBJECT-TYPE
+    SYNTAX      INTEGER {valid(0),corrupt(1),empty(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankA 4 }
+
+-- Status of software in boot BankB
+systemSwUpgradeStatusSwBankB OBJECT IDENTIFIER ::= { systemSwUpgradeStatus 9 }
+
+systemSwUpgradeStatusSwBankBBank OBJECT-TYPE
+    SYNTAX      SwBootBank
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankB 1 }
+
+systemSwUpgradeStatusSwBankBSwVersion OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankB 2 }
+
+systemSwUpgradeStatusSwBankBSwImageFile OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankB 3 }
+
+systemSwUpgradeStatusSwBankBStatus OBJECT-TYPE
+    SYNTAX      INTEGER {valid(0),corrupt(1),empty(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSwUpgradeStatusSwBankB 4 }
+
+-- System status
+systemStatus OBJECT IDENTIFIER ::= { system 15 }
+
+-- CPU load
+systemStatusCpu OBJECT IDENTIFIER ::= { systemStatus 1 }
+
+-- CPU load
+systemStatusCpuCpuLoadAvg OBJECT IDENTIFIER ::= { systemStatusCpu 1 }
+
+systemStatusCpuCpuLoadAvgMin1 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "1 minute CPU load average"
+    ::= { systemStatusCpuCpuLoadAvg 1 }
+
+systemStatusCpuCpuLoadAvgMin5 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "5 minutes CPU load average"
+    ::= { systemStatusCpuCpuLoadAvg 2 }
+
+systemStatusCpuCpuLoadAvgMin15 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "15 minutes CPU load average"
+    ::= { systemStatusCpuCpuLoadAvg 3 }
+
+-- Memory consumption
+systemStatusMemory OBJECT IDENTIFIER ::= { systemStatus 2 }
+
+systemStatusMemoryTotal OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Total memory"
+    ::= { systemStatusMemory 1 }
+
+systemStatusMemoryUsed OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Used memory"
+    ::= { systemStatusMemory 2 }
+
+systemStatusMemoryAvailable OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Available memory"
+    ::= { systemStatusMemory 3 }
+
+-- System audit
+systemAudit OBJECT IDENTIFIER ::= { system 16 }
+
+systemAuditEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Enable/disable system auditing to syslog"
+    ::= { systemAudit 1 }
+
+-- Audit syslog configuration
+systemAuditSyslog OBJECT IDENTIFIER ::= { systemAudit 2 }
+
+systemAuditSyslogFacility OBJECT-TYPE
+    SYNTAX      SyslogClientFacility
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Syslog facility"
+    ::= { systemAuditSyslog 1 }
+
+systemAuditSyslogSeverity OBJECT-TYPE
+    SYNTAX      SyslogClientSeverity
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Syslog severity"
+    ::= { systemAuditSyslog 2 }
+
+-- DNS configuration
+systemDns OBJECT IDENTIFIER ::= { system 17 }
+
+systemDnsNameservers OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Name servers list"
+    ::= { systemDns 1 }
+
+systemDnsDnsStatus OBJECT IDENTIFIER ::= { systemDns 2 }
+
+systemDnsDnsStatusNameservers OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemDnsDnsStatus 1 }
+
+systemConfigFilesStatusTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemConfigFilesStatusEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configuration files"
+    ::= { systemConfigFiles 1 }
+
+systemConfigFilesStatusEntry OBJECT-TYPE
+    SYNTAX      SystemConfigFilesStatusEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED systemConfigFilesStatusShowLeafFilename }
+        ::= { systemConfigFilesStatusTable 1 }
+
+SystemConfigFilesStatusEntry ::=
+    SEQUENCE {
+        systemConfigFilesStatusShowLeafFilename String,
+        systemConfigFilesStatusShowLeafDate String,
+        systemConfigFilesStatusShowLeafSize Unsigned32
+    }
+
+systemConfigFilesStatusShowLeafFilename OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemConfigFilesStatusEntry 1 }
+
+systemConfigFilesStatusShowLeafDate OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemConfigFilesStatusEntry 2 }
+
+systemConfigFilesStatusShowLeafSize OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemConfigFilesStatusEntry 3 }
+
+systemAaaUsernameTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemAaaUsernameEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "System user"
+    ::= { systemAaa 2 }
+
+systemAaaUsernameEntry OBJECT-TYPE
+    SYNTAX      SystemAaaUsernameEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED systemAaaUsernameName }
+        ::= { systemAaaUsernameTable 1 }
+
+SystemAaaUsernameEntry ::=
+    SEQUENCE {
+        systemAaaUsernameName AaaName,
+        systemAaaUsernamePassword AaaPassword,
+        systemAaaUsernameGroup Group,
+        systemAaaUsernameIsUserDormant TruthValue,
+        systemAaaUsernameRowstatus RowStatus
+    }
+
+systemAaaUsernameName OBJECT-TYPE
+    SYNTAX      AaaName
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "User name"
+    ::= { systemAaaUsernameEntry 1 }
+
+systemAaaUsernamePassword OBJECT-TYPE
+    SYNTAX      AaaPassword
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "User password"
+    ::= { systemAaaUsernameEntry 2 }
+
+systemAaaUsernameGroup OBJECT-TYPE
+    SYNTAX      Group
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "User group"
+    ::= { systemAaaUsernameEntry 3 }
+
+systemAaaUsernameIsUserDormant OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAaaUsernameEntry 4 }
+
+systemAaaUsernameRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAaaUsernameEntry 6 }
+
+systemAlarmsAlarmTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemAlarmsAlarmEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Alarms info.
+	For showing alarms in 'last-updated' order: 'show system alarms', or
+	'show system alarms alarm | sort-by last-updated'"
+    ::= { systemAlarms 3 }
+
+systemAlarmsAlarmEntry OBJECT-TYPE
+    SYNTAX      SystemAlarmsAlarmEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemAlarmsAlarmKey }
+        ::= { systemAlarmsAlarmTable 1 }
+
+SystemAlarmsAlarmEntry ::=
+    SEQUENCE {
+        systemAlarmsAlarmKey Unsigned32,
+        systemAlarmsAlarmLastUpdated Unsigned32,
+        systemAlarmsAlarmStatus AlarmManagerStatus,
+        systemAlarmsAlarmCreation String,
+        systemAlarmsAlarmClearance String,
+        systemAlarmsAlarmId Unsigned32,
+        systemAlarmsAlarmModule AlarmModule,
+        systemAlarmsAlarmSeverity AlarmSeverity,
+        systemAlarmsAlarmMessage String
+    }
+
+systemAlarmsAlarmKey OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 1 }
+
+systemAlarmsAlarmLastUpdated OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 2 }
+
+systemAlarmsAlarmStatus OBJECT-TYPE
+    SYNTAX      AlarmManagerStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 3 }
+
+systemAlarmsAlarmCreation OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 4 }
+
+systemAlarmsAlarmClearance OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 5 }
+
+systemAlarmsAlarmId OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 6 }
+
+systemAlarmsAlarmModule OBJECT-TYPE
+    SYNTAX      AlarmModule
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 7 }
+
+systemAlarmsAlarmSeverity OBJECT-TYPE
+    SYNTAX      AlarmSeverity
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 8 }
+
+systemAlarmsAlarmMessage OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 256))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemAlarmsAlarmEntry 9 }
+
+systemSecurityAclTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemSecurityAclEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Access control list configuration for managment port"
+    ::= { systemSecurity 2 }
+
+systemSecurityAclEntry OBJECT-TYPE
+    SYNTAX      SystemSecurityAclEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED systemSecurityAclName }
+        ::= { systemSecurityAclTable 1 }
+
+SystemSecurityAclEntry ::=
+    SEQUENCE {
+        systemSecurityAclName AclName,
+        systemSecurityAclIp ConfdString,
+        systemSecurityAclRowstatus RowStatus
+    }
+
+systemSecurityAclName OBJECT-TYPE
+    SYNTAX      AclName
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Rule name"
+    ::= { systemSecurityAclEntry 1 }
+
+systemSecurityAclIp OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Access-allowed IP list"
+    ::= { systemSecurityAclEntry 2 }
+
+systemSecurityAclRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSecurityAclEntry 4 }
+
+systemSyslogRuleTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemSyslogRuleEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSyslog 1 }
+
+systemSyslogRuleEntry OBJECT-TYPE
+    SYNTAX      SystemSyslogRuleEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED systemSyslogRuleName }
+        ::= { systemSyslogRuleTable 1 }
+
+SystemSyslogRuleEntry ::=
+    SEQUENCE {
+        systemSyslogRuleName String,
+        systemSyslogRuleDescription String,
+        systemSyslogRuleEnabled TruthValue,
+        systemSyslogRuleActionType SyslogActionType,
+        systemSyslogRuleActionLocalFileSettingsImmediateSync TruthValue,
+        systemSyslogRuleActionLocalUserSettingsUsers ConfdString,
+        systemSyslogRuleActionRemoteMachineSettingsName ConfdString,
+        systemSyslogRuleActionRemoteMachineSettingsTransport SyslogTransport,
+        systemSyslogRuleActionRemoteMachineSettingsPort UnsignedShort,
+        systemSyslogRuleRowstatus RowStatus
+    }
+
+systemSyslogRuleName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Unique name for this syslog rule"
+    ::= { systemSyslogRuleEntry 1 }
+
+systemSyslogRuleDescription OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Rule's description"
+    ::= { systemSyslogRuleEntry 2 }
+
+systemSyslogRuleEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Rule's admin status"
+    ::= { systemSyslogRuleEntry 3 }
+
+systemSyslogRuleActionType OBJECT-TYPE
+    SYNTAX      SyslogActionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Rule's action"
+    ::= { systemSyslogRuleEntry 4 }
+
+systemSyslogRuleActionLocalFileSettingsImmediateSync OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set to 'true' to sync the file after each log message"
+    ::= { systemSyslogRuleEntry 5 }
+
+systemSyslogRuleActionLocalUserSettingsUsers OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "List of users that will be notified by this rule, use 'all' for all users"
+    ::= { systemSyslogRuleEntry 6 }
+
+systemSyslogRuleActionRemoteMachineSettingsName OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Remote host name"
+    ::= { systemSyslogRuleEntry 7 }
+
+systemSyslogRuleActionRemoteMachineSettingsTransport OBJECT-TYPE
+    SYNTAX      SyslogTransport
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Transport protocol"
+    DEFVAL { udp }
+    ::= { systemSyslogRuleEntry 8 }
+
+systemSyslogRuleActionRemoteMachineSettingsPort OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Transport port to use"
+    ::= { systemSyslogRuleEntry 9 }
+
+systemSyslogRuleRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSyslogRuleEntry 10 }
+
+systemSyslogRuleSelectorsTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemSyslogRuleSelectorsEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "List of selectors for this rule"
+    ::= { systemMib 2 }
+
+systemSyslogRuleSelectorsEntry OBJECT-TYPE
+    SYNTAX      SystemSyslogRuleSelectorsEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemSyslogRuleName, systemSyslogRuleSelectorsSelectorId }
+        ::= { systemSyslogRuleSelectorsTable 1 }
+
+SystemSyslogRuleSelectorsEntry ::=
+    SEQUENCE {
+        systemSyslogRuleSelectorsSelectorId Unsigned32,
+        systemSyslogRuleSelectorsFacilityList ConfdString,
+        systemSyslogRuleSelectorsIgnore TruthValue,
+        systemSyslogRuleSelectorsComparison SyslogComparison,
+        systemSyslogRuleSelectorsPriority SyslogPriority,
+        systemSyslogRuleSelectorsRowstatus RowStatus
+    }
+
+systemSyslogRuleSelectorsSelectorId OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Uniquly identifies the selector"
+    ::= { systemSyslogRuleSelectorsEntry 1 }
+
+systemSyslogRuleSelectorsFacilityList OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Syslog facilities for this selector"
+    ::= { systemSyslogRuleSelectorsEntry 2 }
+
+systemSyslogRuleSelectorsIgnore OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Ignore the given priorities"
+    ::= { systemSyslogRuleSelectorsEntry 3 }
+
+systemSyslogRuleSelectorsComparison OBJECT-TYPE
+    SYNTAX      SyslogComparison
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Comparision method, use 'same' for the exact priority, use 'same-or-highr' for the given and higher priorities"
+    DEFVAL { sameOrHigher }
+    ::= { systemSyslogRuleSelectorsEntry 4 }
+
+systemSyslogRuleSelectorsPriority OBJECT-TYPE
+    SYNTAX      SyslogPriority
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Syslog priority for this selector"
+    ::= { systemSyslogRuleSelectorsEntry 5 }
+
+systemSyslogRuleSelectorsRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemSyslogRuleSelectorsEntry 6 }
+
+systemTimeAndDateNtpServerTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemTimeAndDateNtpServerEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "NTP server list"
+    ::= { systemTimeAndDateNtp 3 }
+
+systemTimeAndDateNtpServerEntry OBJECT-TYPE
+    SYNTAX      SystemTimeAndDateNtpServerEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemTimeAndDateNtpServerId }
+        ::= { systemTimeAndDateNtpServerTable 1 }
+
+SystemTimeAndDateNtpServerEntry ::=
+    SEQUENCE {
+        systemTimeAndDateNtpServerId UnsignedShort,
+        systemTimeAndDateNtpServerAddress ConfdString,
+        systemTimeAndDateNtpServerPolling INTEGER,
+        systemTimeAndDateNtpServerPollMaxInterval UnsignedShort,
+        systemTimeAndDateNtpServerPollMinInterval UnsignedShort,
+        systemTimeAndDateNtpServerAuthenticationType KeyDigest,
+        systemTimeAndDateNtpServerKeyid UnsignedShort,
+        systemTimeAndDateNtpServerKeyValue ConfdString,
+        systemTimeAndDateNtpServerRowstatus RowStatus
+    }
+
+systemTimeAndDateNtpServerId OBJECT-TYPE
+    SYNTAX      UnsignedShort (1 .. 4)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "NTP server id"
+    ::= { systemTimeAndDateNtpServerEntry 1 }
+
+systemTimeAndDateNtpServerAddress OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "NTP server hostname or address"
+    ::= { systemTimeAndDateNtpServerEntry 2 }
+
+systemTimeAndDateNtpServerPolling OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set to 'enable' to use this server in polling mode"
+    ::= { systemTimeAndDateNtpServerEntry 3 }
+
+systemTimeAndDateNtpServerPollMaxInterval OBJECT-TYPE
+    SYNTAX      UnsignedShort (10 .. 17)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Maximum poll intervals for NTP messages, in seconds as a power of two"
+    DEFVAL { 10 }
+    ::= { systemTimeAndDateNtpServerEntry 4 }
+
+systemTimeAndDateNtpServerPollMinInterval OBJECT-TYPE
+    SYNTAX      UnsignedShort (3 .. 10)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Minimum poll intervals for NTP  messages, in seconds as a power of two"
+    DEFVAL { 6 }
+    ::= { systemTimeAndDateNtpServerEntry 5 }
+
+systemTimeAndDateNtpServerAuthenticationType OBJECT-TYPE
+    SYNTAX      KeyDigest
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Authentication method to use in NTP messages"
+    DEFVAL { none }
+    ::= { systemTimeAndDateNtpServerEntry 6 }
+
+systemTimeAndDateNtpServerKeyid OBJECT-TYPE
+    SYNTAX      UnsignedShort (1 .. 65534)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Symmetric key id for NTP messages authentication, id must be unique"
+    ::= { systemTimeAndDateNtpServerEntry 7 }
+
+systemTimeAndDateNtpServerKeyValue OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Symmetric key value for NTP messages authentication"
+    ::= { systemTimeAndDateNtpServerEntry 8 }
+
+systemTimeAndDateNtpServerRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemTimeAndDateNtpServerEntry 9 }
+
+systemInterfaceTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemInterfaceEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Interfaces configuration"
+    ::= { system 18 }
+
+systemInterfaceEntry OBJECT-TYPE
+    SYNTAX      SystemInterfaceEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED systemInterfaceName }
+        ::= { systemInterfaceTable 1 }
+
+SystemInterfaceEntry ::=
+    SEQUENCE {
+        systemInterfaceName String,
+        systemInterfaceTouch Unsigned32,
+        systemInterfaceIpv4Address IpAddress,
+        systemInterfaceIpv4Mask IpAddress,
+        systemInterfaceIpv4Gateway IpAddress,
+        systemInterfaceIpv6Address Ipv6Address,
+        systemInterfaceIpv6PrefixLen Unsigned32,
+        systemInterfaceIpv6Gateway Ipv6Address,
+        systemInterfaceDhcp INTEGER,
+        systemInterfaceSpeed MgmtPortSpeedConfig,
+        systemInterfaceDuplex PortDuplexConfig,
+        systemInterfaceStatusMac String,
+        systemInterfaceStatusLink String,
+        systemInterfaceStatusSpeed MgmtPortSpeed,
+        systemInterfaceStatusDuplex String,
+        systemInterfaceStatusIpv4Address String,
+        systemInterfaceStatusIpv4Mask String,
+        systemInterfaceStatusIpv4Gateway String,
+        systemInterfaceStatusIpv6Address String,
+        systemInterfaceStatusIpv6PrefixLen String,
+        systemInterfaceStatusIpv6Gateway String,
+        systemInterfaceRowstatus RowStatus
+    }
+
+systemInterfaceName OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemInterfaceEntry 1 }
+
+systemInterfaceTouch OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    DEFVAL { 0 }
+    ::= { systemInterfaceEntry 2 }
+
+systemInterfaceIpv4Address OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IPv4 address"
+    ::= { systemInterfaceEntry 3 }
+
+systemInterfaceIpv4Mask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IPv4 network mask"
+    ::= { systemInterfaceEntry 4 }
+
+systemInterfaceIpv4Gateway OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IPv4 default gateway"
+    ::= { systemInterfaceEntry 5 }
+
+systemInterfaceIpv6Address OBJECT-TYPE
+    SYNTAX      Ipv6Address
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IPv6 address"
+    ::= { systemInterfaceEntry 6 }
+
+systemInterfaceIpv6PrefixLen OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IPv6 prefix length"
+    ::= { systemInterfaceEntry 7 }
+
+systemInterfaceIpv6Gateway OBJECT-TYPE
+    SYNTAX      Ipv6Address
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IPv6 default gateway"
+    ::= { systemInterfaceEntry 8 }
+
+systemInterfaceDhcp OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "DHCP admin status"
+    ::= { systemInterfaceEntry 9 }
+
+systemInterfaceSpeed OBJECT-TYPE
+    SYNTAX      MgmtPortSpeedConfig
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface speed"
+    ::= { systemInterfaceEntry 10 }
+
+systemInterfaceDuplex OBJECT-TYPE
+    SYNTAX      PortDuplexConfig
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface duplex"
+    ::= { systemInterfaceEntry 11 }
+
+systemInterfaceStatusMac OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "MAC address"
+    ::= { systemInterfaceEntry 12 }
+
+systemInterfaceStatusLink OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Ethernet Port link state"
+    ::= { systemInterfaceEntry 13 }
+
+systemInterfaceStatusSpeed OBJECT-TYPE
+    SYNTAX      MgmtPortSpeed
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Speed"
+    ::= { systemInterfaceEntry 14 }
+
+systemInterfaceStatusDuplex OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Duplex"
+    ::= { systemInterfaceEntry 15 }
+
+systemInterfaceStatusIpv4Address OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "IPv4 address"
+    ::= { systemInterfaceEntry 16 }
+
+systemInterfaceStatusIpv4Mask OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "IPv4 network mask"
+    ::= { systemInterfaceEntry 17 }
+
+systemInterfaceStatusIpv4Gateway OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "IPv4 default gateway"
+    ::= { systemInterfaceEntry 18 }
+
+systemInterfaceStatusIpv6Address OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "IPv6 address"
+    ::= { systemInterfaceEntry 19 }
+
+systemInterfaceStatusIpv6PrefixLen OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 8))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "IPv6 prefix-len"
+    ::= { systemInterfaceEntry 20 }
+
+systemInterfaceStatusIpv6Gateway OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "IPv6 gateway"
+    ::= { systemInterfaceEntry 21 }
+
+systemInterfaceRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemInterfaceEntry 22 }
+
+systemInterfaceRouteTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemInterfaceRouteEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Route list"
+    ::= { systemMib 3 }
+
+systemInterfaceRouteEntry OBJECT-TYPE
+    SYNTAX      SystemInterfaceRouteEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemInterfaceName, IMPLIED systemInterfaceRouteName }
+        ::= { systemInterfaceRouteTable 1 }
+
+SystemInterfaceRouteEntry ::=
+    SEQUENCE {
+        systemInterfaceRouteName String,
+        systemInterfaceRouteTo IpPrefix,
+        systemInterfaceRouteVia InetAddressIP,
+        systemInterfaceRouteStatusName String,
+        systemInterfaceRouteStatusTo String,
+        systemInterfaceRouteStatusVia String,
+        systemInterfaceRouteRowstatus RowStatus
+    }
+
+systemInterfaceRouteName OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Route name"
+    ::= { systemInterfaceRouteEntry 1 }
+
+systemInterfaceRouteTo OBJECT-TYPE
+    SYNTAX      IpPrefix
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Route to network"
+    ::= { systemInterfaceRouteEntry 2 }
+
+systemInterfaceRouteVia OBJECT-TYPE
+    SYNTAX      InetAddressIP
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Route packets via address"
+    ::= { systemInterfaceRouteEntry 3 }
+
+systemInterfaceRouteStatusName OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemInterfaceRouteEntry 4 }
+
+systemInterfaceRouteStatusTo OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemInterfaceRouteEntry 5 }
+
+systemInterfaceRouteStatusVia OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemInterfaceRouteEntry 6 }
+
+systemInterfaceRouteRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemInterfaceRouteEntry 7 }
+
+systemUserMgmtRemoteServerTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemUserMgmtRemoteServerEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Remote authentication servers settings"
+    ::= { systemUserMgmt 3 }
+
+systemUserMgmtRemoteServerEntry OBJECT-TYPE
+    SYNTAX      SystemUserMgmtRemoteServerEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemUserMgmtRemoteServerAuthPriority }
+        ::= { systemUserMgmtRemoteServerTable 1 }
+
+SystemUserMgmtRemoteServerEntry ::=
+    SEQUENCE {
+        systemUserMgmtRemoteServerAuthPriority Unsigned32,
+        systemUserMgmtRemoteServerAdmin INTEGER,
+        systemUserMgmtRemoteServerAuthMethod RemoteAuthentication,
+        systemUserMgmtRemoteServerAddress String,
+        systemUserMgmtRemoteServerPort UnsignedShort,
+        systemUserMgmtRemoteServerKey ConfdString,
+        systemUserMgmtRemoteServerRowstatus RowStatus
+    }
+
+systemUserMgmtRemoteServerAuthPriority OBJECT-TYPE
+    SYNTAX      Unsigned32 (1 .. 5)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "<1..5> - 1 is highest Priority"
+    ::= { systemUserMgmtRemoteServerEntry 1 }
+
+systemUserMgmtRemoteServerAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Server admin status"
+    ::= { systemUserMgmtRemoteServerEntry 2 }
+
+systemUserMgmtRemoteServerAuthMethod OBJECT-TYPE
+    SYNTAX      RemoteAuthentication
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Authentication method (RADIUS or TACACS)"
+    ::= { systemUserMgmtRemoteServerEntry 3 }
+
+systemUserMgmtRemoteServerAddress OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Server IP address or DNS name"
+    ::= { systemUserMgmtRemoteServerEntry 4 }
+
+systemUserMgmtRemoteServerPort OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Server port, use 0 for default port according to method"
+    DEFVAL { 0 }
+    ::= { systemUserMgmtRemoteServerEntry 5 }
+
+systemUserMgmtRemoteServerKey OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Server's secret key"
+    ::= { systemUserMgmtRemoteServerEntry 6 }
+
+systemUserMgmtRemoteServerRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemUserMgmtRemoteServerEntry 8 }
+
+systemHwStatusFanTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemHwStatusFanEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Fan details"
+    ::= { systemHwStatus 1 }
+
+systemHwStatusFanEntry OBJECT-TYPE
+    SYNTAX      SystemHwStatusFanEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemHwStatusFanNumber }
+        ::= { systemHwStatusFanTable 1 }
+
+SystemHwStatusFanEntry ::=
+    SEQUENCE {
+        systemHwStatusFanNumber UnsignedShort,
+        systemHwStatusFanAvailable TruthValue,
+        systemHwStatusFanDirection Direction,
+        systemHwStatusFanFrontSpeed String,
+        systemHwStatusFanRearSpeed String,
+        systemHwStatusFanStatus INTEGER,
+        systemHwStatusFanLastFailureTimestamp String
+    }
+
+systemHwStatusFanNumber OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemHwStatusFanEntry 1 }
+
+systemHwStatusFanAvailable OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Description"
+    ::= { systemHwStatusFanEntry 2 }
+
+systemHwStatusFanDirection OBJECT-TYPE
+    SYNTAX      Direction
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Fan direction"
+    ::= { systemHwStatusFanEntry 3 }
+
+systemHwStatusFanFrontSpeed OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Front speed in rpm"
+    ::= { systemHwStatusFanEntry 4 }
+
+systemHwStatusFanRearSpeed OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Rear speed in rpm"
+    ::= { systemHwStatusFanEntry 5 }
+
+systemHwStatusFanStatus OBJECT-TYPE
+    SYNTAX      INTEGER {ok(0),alarm(1),unknown(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Fan status (ok\alert)"
+    ::= { systemHwStatusFanEntry 6 }
+
+systemHwStatusFanLastFailureTimestamp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time stamp of last failure"
+    ::= { systemHwStatusFanEntry 7 }
+
+systemHwStatusPsuTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemHwStatusPsuEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Powers supply details"
+    ::= { systemHwStatus 2 }
+
+systemHwStatusPsuEntry OBJECT-TYPE
+    SYNTAX      SystemHwStatusPsuEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemHwStatusPsuNumber }
+        ::= { systemHwStatusPsuTable 1 }
+
+SystemHwStatusPsuEntry ::=
+    SEQUENCE {
+        systemHwStatusPsuNumber UnsignedShort,
+        systemHwStatusPsuAvailable TruthValue,
+        systemHwStatusPsuPsuDescr String,
+        systemHwStatusPsuPowerGood StatusType,
+        systemHwStatusPsuVoltage ConfdString,
+        systemHwStatusPsuCurrent ConfdString,
+        systemHwStatusPsuPower ConfdString,
+        systemHwStatusPsuPsuTemp Integer32,
+        systemHwStatusPsuPsuOverTemp PsuOverType,
+        systemHwStatusPsuLastFailureTimestamp String,
+        systemHwStatusPsuLowThresholdInVolts ConfdString,
+        systemHwStatusPsuHighThresholdInVolts ConfdString
+    }
+
+systemHwStatusPsuNumber OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemHwStatusPsuEntry 1 }
+
+systemHwStatusPsuAvailable OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Available"
+    ::= { systemHwStatusPsuEntry 2 }
+
+systemHwStatusPsuPsuDescr OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "PSU model"
+    ::= { systemHwStatusPsuEntry 3 }
+
+systemHwStatusPsuPowerGood OBJECT-TYPE
+    SYNTAX      StatusType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Power good"
+    ::= { systemHwStatusPsuEntry 4 }
+
+systemHwStatusPsuVoltage OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current voltage in Volt units"
+    ::= { systemHwStatusPsuEntry 5 }
+
+systemHwStatusPsuCurrent OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current voltage in Ampere units"
+    ::= { systemHwStatusPsuEntry 6 }
+
+systemHwStatusPsuPower OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current voltage in Watt units"
+    ::= { systemHwStatusPsuEntry 7 }
+
+systemHwStatusPsuPsuTemp OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "PSU temp (multiplied by 1000)"
+    ::= { systemHwStatusPsuEntry 8 }
+
+systemHwStatusPsuPsuOverTemp OBJECT-TYPE
+    SYNTAX      PsuOverType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "PSU over Temp"
+    ::= { systemHwStatusPsuEntry 9 }
+
+systemHwStatusPsuLastFailureTimestamp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time stamp of last failure"
+    ::= { systemHwStatusPsuEntry 10 }
+
+systemHwStatusPsuLowThresholdInVolts OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemHwStatusPsuEntry 11 }
+
+systemHwStatusPsuHighThresholdInVolts OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemHwStatusPsuEntry 12 }
+
+systemHwStatusTemperatureSensorsTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemHwStatusTemperatureSensorsEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "List of temperature sensors"
+    ::= { systemHwStatus 3 }
+
+systemHwStatusTemperatureSensorsEntry OBJECT-TYPE
+    SYNTAX      SystemHwStatusTemperatureSensorsEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemHwStatusTemperatureSensorsNumber }
+        ::= { systemHwStatusTemperatureSensorsTable 1 }
+
+SystemHwStatusTemperatureSensorsEntry ::=
+    SEQUENCE {
+        systemHwStatusTemperatureSensorsNumber UnsignedShort,
+        systemHwStatusTemperatureSensorsDescr String,
+        systemHwStatusTemperatureSensorsStatus INTEGER,
+        systemHwStatusTemperatureSensorsTemp ConfdString,
+        systemHwStatusTemperatureSensorsHighThresholdInCelsius ConfdString,
+        systemHwStatusTemperatureSensorsLowThresholdInCelsius ConfdString,
+        systemHwStatusTemperatureSensorsLastFailureTimestamp String
+    }
+
+systemHwStatusTemperatureSensorsNumber OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemHwStatusTemperatureSensorsEntry 1 }
+
+systemHwStatusTemperatureSensorsDescr OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Sensor description"
+    ::= { systemHwStatusTemperatureSensorsEntry 2 }
+
+systemHwStatusTemperatureSensorsStatus OBJECT-TYPE
+    SYNTAX      INTEGER {ok(0),alarm(1),unknown(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Temperature sensor status"
+    ::= { systemHwStatusTemperatureSensorsEntry 3 }
+
+systemHwStatusTemperatureSensorsTemp OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current temperature in degrees celsius"
+    ::= { systemHwStatusTemperatureSensorsEntry 4 }
+
+systemHwStatusTemperatureSensorsHighThresholdInCelsius OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Raise alarm when temrature is above this threshold"
+    ::= { systemHwStatusTemperatureSensorsEntry 5 }
+
+systemHwStatusTemperatureSensorsLowThresholdInCelsius OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Raise alarm when tempreature is below this threshold"
+    ::= { systemHwStatusTemperatureSensorsEntry 6 }
+
+systemHwStatusTemperatureSensorsLastFailureTimestamp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { systemHwStatusTemperatureSensorsEntry 7 }
+
+systemStatusCpuCpuTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemStatusCpuCpuEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "CPU list"
+    ::= { systemStatusCpu 2 }
+
+systemStatusCpuCpuEntry OBJECT-TYPE
+    SYNTAX      SystemStatusCpuCpuEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { systemStatusCpuCpuNum }
+        ::= { systemStatusCpuCpuTable 1 }
+
+SystemStatusCpuCpuEntry ::=
+    SEQUENCE {
+        systemStatusCpuCpuNum Unsigned32,
+        systemStatusCpuCpuLoad ConfdString,
+        systemStatusCpuCpuAdditionalInfo String
+    }
+
+systemStatusCpuCpuNum OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "CPU number"
+    ::= { systemStatusCpuCpuEntry 1 }
+
+systemStatusCpuCpuLoad OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "CPU load"
+    ::= { systemStatusCpuCpuEntry 2 }
+
+systemStatusCpuCpuAdditionalInfo OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Additional CPU info"
+    ::= { systemStatusCpuCpuEntry 3 }
+
+systemStatusDiskTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SystemStatusDiskEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Disk consumption"
+    ::= { systemStatus 3 }
+
+systemStatusDiskEntry OBJECT-TYPE
+    SYNTAX      SystemStatusDiskEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED systemStatusDiskName }
+        ::= { systemStatusDiskTable 1 }
+
+SystemStatusDiskEntry ::=
+    SEQUENCE {
+        systemStatusDiskName String,
+        systemStatusDiskSize ConfdString,
+        systemStatusDiskUsed ConfdString,
+        systemStatusDiskAvailable ConfdString,
+        systemStatusDiskUsedPercent ConfdString
+    }
+
+systemStatusDiskName OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Disk name"
+    ::= { systemStatusDiskEntry 1 }
+
+systemStatusDiskSize OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Total size"
+    ::= { systemStatusDiskEntry 2 }
+
+systemStatusDiskUsed OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Used size"
+    ::= { systemStatusDiskEntry 3 }
+
+systemStatusDiskAvailable OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Available size"
+    ::= { systemStatusDiskEntry 4 }
+
+systemStatusDiskUsedPercent OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Used size percentage"
+    ::= { systemStatusDiskEntry 5 }
+
+END

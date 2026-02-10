@@ -1,0 +1,405 @@
+NPB-TRAPS DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+    Integer32, enterprises FROM SNMPv2-SMI
+    DisplayString, RowStatus, TruthValue
+        FROM SNMPv2-TC
+    MODULE-COMPLIANCE, OBJECT-GROUP, NOTIFICATION-GROUP
+        FROM SNMPv2-CONF
+    TEXTUAL-CONVENTION
+        FROM SNMPv2-TC
+	npb-2e
+		FROM NPB-2E
+    
+    portsPortSpeed, portsPortLogicalPortNumber, 
+    portStatisticsUtilizationPortRxUtilBpsCurrent1sec, portStatisticsUtilizationPortRxUtilPercentsCurrent1sec, portsPortUtilizationAlertsRxRaiseThreshold,
+    portStatisticsUtilizationPortTxUtilBpsCurrent1sec, portStatisticsUtilizationPortTxUtilPercentsCurrent1sec, portsPortUtilizationAlertsTxRaiseThreshold,
+    transceiversDdmQsfpId, transceiversDdmSfpRtTemperature, transceiversDdmSfpRtVcc, transceiversDdmSfpRtTxBiasCurrent, transceiversDdmSfpRtTxInputPower, transceiversDdmSfpRtRxInputPower
+        FROM NPB-PORTS
+
+    haOperHaMode, haOperDataReplicationStatus
+        FROM NPB-HA
+
+    systemHwStatusFanNumber, systemHwStatusFanFrontSpeed, systemHwStatusFanRearSpeed,
+    systemHwStatusPsuNumber, systemHwStatusPsuVoltage, systemHwStatusPsuPsuTemp,
+    systemHwStatusTemperatureSensorsTemp, systemHwStatusTemperatureSensorsHighThresholdInCelsius, systemHwStatusTemperatureSensorsNumber,
+    systemAaaUsernameName, systemSwUpgradeStatusBootBankCur, systemSwUpgradeStatusUpgradeStatus
+        FROM NPB-SYSTEM
+        
+    lbGroupLbId
+        FROM NPB-LB
+		
+	inlineToolName, inlineToolFailoverAction, inlineToolchainName, inlineToolchainFailoverAction
+		FROM NPB-INLINE
+		
+	heartbeatProfileName, heartbeatProfileDirection
+		FROM NPB-HB
+;
+
+notificationsMib MODULE-IDENTITY
+    LAST-UPDATED "201512290000Z"
+    ORGANIZATION ""
+    CONTACT-INFO ""
+    DESCRIPTION ""
+    REVISION "201607130000Z"
+    DESCRIPTION "Definitions of NPB traps"
+    ::= { npb-2e 10 }
+
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+-- use variables for varbinds that can not by imported
+variables     OBJECT IDENTIFIER ::= { notificationsMib 1 }
+
+-- use notification according to product specifications, oid MUST match the defined alarm id
+notifications OBJECT IDENTIFIER ::= { notificationsMib 2 }
+
+
+-- variables
+----------------------------------------------------------------------------------------------
+
+-- module name (e.g PORT, HW, BCM, FLTR, SYS)
+module OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "The name of the FW module that genertes the trap"
+    ::= { variables 1 }
+
+-- Trap severity (INFO, MIN, MJR, CRIT)
+severity OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 4))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Trap's severity"
+    ::= { variables 2 }
+
+-- Trap type (ACT, RES, EVT)
+type OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 4))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Trap's Type, ACT and RES for raising and clearing an alarm, EVT for a stateless event"
+    ::= { variables 3 }
+
+-- Trap severity (ACT, RES, EVT)
+message OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 256))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Formatted message that describes the trap, use $n for the value of varbind n, for example 'Port $3' in case the port number is in varbind 3"
+    ::= { variables 4 }
+
+-- Transceiver specific variables
+-- Level
+transceiverLevel OBJECT-TYPE
+    SYNTAX      INTEGER {warning(0),alarm(1)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Transceiver's alarm level"
+    ::= { variables 5 }
+
+-- Channel
+transceiverChannel OBJECT-TYPE
+    SYNTAX      INTEGER {channel1(1),channel2(2),channel3(3),channel4(4),channel5(5),channel6(6),channel7(7),channel8(8)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Transceiver's channel"
+    ::= { variables 6 }
+
+-- Users variables - Must be aligned with EAaaContext
+aaaContext OBJECT-TYPE
+    SYNTAX      INTEGER {cli(0),webui(1),snmp(2),netconf(3)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "AAA context"
+    ::= { variables 7 }
+
+weightStr OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 10))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Output weight"
+    ::= { variables 8 }
+
+haClusterIdStr OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 10))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "HA cluster id"
+    ::= { variables 9 }
+
+haPeerIpStr OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 15))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "HA peer ip"
+    ::= { variables 10 }
+
+msgStr OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 256))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Message"
+    ::= { variables 11 }
+
+remoteUrl OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 1024))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Remote URL"
+    ::= { variables 12 }
+
+-- notifications
+----------------------------------------------------------------------------------------------
+
+-- ports
+-----------
+
+-- Link up
+portLinkUp NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, portsPortLogicalPortNumber, portsPortSpeed }
+    STATUS  current
+    DESCRIPTION
+            "Link status changed to UP"
+    ::= { notifications 101 }
+
+-- Link down
+portLinkDown NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, portsPortLogicalPortNumber}
+    STATUS  current
+    DESCRIPTION
+            "Link status changed to DOWN"
+    ::= { notifications 102 }
+
+-- Port utilization RX
+portUtilizationRx NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, portsPortLogicalPortNumber, portStatisticsUtilizationPortRxUtilBpsCurrent1sec, portStatisticsUtilizationPortRxUtilPercentsCurrent1sec, portsPortUtilizationAlertsRxRaiseThreshold }
+    STATUS  current
+    DESCRIPTION
+            "Port RX utilization"
+    ::= { notifications 121 }
+
+-- Port utilization TX
+portUtilizationTx NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, portsPortLogicalPortNumber, portStatisticsUtilizationPortTxUtilBpsCurrent1sec, portStatisticsUtilizationPortTxUtilPercentsCurrent1sec, portsPortUtilizationAlertsTxRaiseThreshold }
+    STATUS  current
+    DESCRIPTION
+            "Port TX utilization"
+    ::= { notifications 122 }
+
+-- hw
+-----------
+
+-- Fan
+fan NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, systemHwStatusFanNumber, systemHwStatusFanFrontSpeed, systemHwStatusFanRearSpeed }
+    STATUS  current
+    DESCRIPTION
+            "Fan status"
+    ::= { notifications 201 }
+
+-- Psu power
+psuPower NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, systemHwStatusPsuNumber, systemHwStatusPsuVoltage, systemHwStatusPsuPsuTemp }
+	STATUS  current
+	DESCRIPTION
+			"Psu power status"
+	::= { notifications 202 }
+
+-- Psu temperature
+psuTemperature NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, systemHwStatusPsuNumber, systemHwStatusPsuVoltage, systemHwStatusPsuPsuTemp }
+	STATUS  current
+	DESCRIPTION
+			"Psu temperature status"
+	::= { notifications 203 }
+
+-- Board temperature
+boardTemperature NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, systemHwStatusTemperatureSensorsTemp, systemHwStatusTemperatureSensorsHighThresholdInCelsius, systemHwStatusTemperatureSensorsNumber }
+	STATUS  current
+	DESCRIPTION
+			"Board temperature status"
+	::= { notifications 204 }
+
+-- todo yogev when there will be thresholds
+-- Transceiver temperature
+transceiverTemperature NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, transceiversDdmQsfpId, transceiversDdmSfpRtTemperature, transceiverLevel }
+	STATUS  current
+	DESCRIPTION
+			"Transceiver temperature status"
+	::= { notifications 221 }
+
+-- Transceiver voltage
+transceiverVoltage NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, transceiversDdmQsfpId, transceiversDdmSfpRtVcc, transceiverLevel }
+	STATUS  current
+	DESCRIPTION
+			"Transceiver voltage status"
+	::= { notifications 222 }
+
+-- Transceiver current
+transceiverCurrent NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, transceiversDdmQsfpId, transceiverChannel, transceiversDdmSfpRtTxBiasCurrent, transceiverLevel }
+	STATUS  current
+	DESCRIPTION
+			"Transceiver current status"
+	::= { notifications 223 }
+
+-- Transceiver TX power
+transceiverTxPower NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, transceiversDdmQsfpId, transceiverChannel, transceiversDdmSfpRtTxInputPower, transceiverLevel }
+	STATUS  current
+	DESCRIPTION
+			"Transceiver TX power status"
+	::= { notifications 224 }
+
+-- Transceiver RX power
+transceiverRxPower NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, transceiversDdmQsfpId, transceiverChannel, transceiversDdmSfpRtRxInputPower, transceiverLevel }
+	STATUS  current
+	DESCRIPTION
+			"Transceiver RX power status"
+	::= { notifications 225 }
+
+-- Recovery
+-----------
+
+-- Recovery event
+-- message: "Recovery event "
+recovery NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message }
+    STATUS  current
+    DESCRIPTION
+            "Recovery event occurred"
+    ::= { notifications 300 }
+
+-- PowerUp
+-----------
+
+-- Reboot completed
+rebootCompleted NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, remoteUrl, systemSwUpgradeStatusBootBankCur }
+    STATUS  current
+    DESCRIPTION
+            "Reboot completed"
+    ::= { notifications 301 }
+
+-- Unexpected shutdown
+unexpectedShutdown NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, remoteUrl, systemSwUpgradeStatusBootBankCur }
+    STATUS  current
+    DESCRIPTION
+            "Unexpected shutdown"
+    ::= { notifications 304 }
+
+-- ImageInstallation
+--------------------
+
+-- Image installation started event
+imageInstallationStarted NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, systemAaaUsernameName, aaaContext, remoteUrl, systemSwUpgradeStatusBootBankCur }
+    STATUS  current
+    DESCRIPTION
+            "Image installation started"
+    ::= { notifications 321 }
+
+-- Image installation completed event
+imageInstallationCompleted NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, systemAaaUsernameName, aaaContext, remoteUrl, systemSwUpgradeStatusBootBankCur, systemSwUpgradeStatusUpgradeStatus }
+    STATUS  current
+    DESCRIPTION
+            "Image installation completed"
+    ::= { notifications 322 }
+
+-- Software changed
+softwareChanged NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, remoteUrl, remoteUrl, systemSwUpgradeStatusBootBankCur }
+    STATUS  current
+    DESCRIPTION
+            "Software changed"
+    ::= { notifications 323 }
+
+-- License validation
+licenseValidation NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message }
+    STATUS  current
+    DESCRIPTION
+            "License validation"
+    ::= { notifications 330 }
+
+-- ha
+-----------
+
+-- HA status changed
+haStatusChanged NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, haOperHaMode, haOperHaMode, haClusterIdStr, haPeerIpStr }
+    STATUS  current
+    DESCRIPTION
+            "HA status changed"
+    ::= { notifications 350 }
+
+-- HA peer connection status
+haPeerConnection NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, haOperHaMode, haClusterIdStr, haPeerIpStr, msgStr }
+    STATUS  current
+    DESCRIPTION
+            "HA peer connection status"
+    ::= { notifications 351 }
+
+-- HA DB replication status
+haDataReplicationStatus NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, haOperDataReplicationStatus, haOperHaMode, haClusterIdStr, haPeerIpStr }
+    STATUS  current
+    DESCRIPTION
+            "HA DB replication status"
+    ::= { notifications 352 }
+
+-- lb port status changed
+loadBalancePortStatus NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, lbGroupLbId,  portsPortLogicalPortNumber, weightStr }
+    STATUS  current
+    DESCRIPTION
+            "LB port status changed"
+    ::= { notifications 400 }
+
+-- lb standby event
+loadBalanceStandbyEvent NOTIFICATION-TYPE
+    OBJECTS { module, severity, type, message, lbGroupLbId,  portsPortLogicalPortNumber, weightStr, portsPortLogicalPortNumber, weightStr }
+    STATUS  current
+    DESCRIPTION
+            "LB standby event"
+    ::= { notifications 401 }
+
+-- heartbeat status change  
+heartbeatStatusChange NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, heartbeatProfileName,  portsPortLogicalPortNumber, portsPortLogicalPortNumber, heartbeatProfileDirection }
+	STATUS  current
+	DESCRIPTION
+			"Heartbeat status change"
+	::= { notifications 450 }
+
+-- inline-tool status change  
+inlineToolStatusChange NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, inlineToolName,  portsPortLogicalPortNumber, portsPortLogicalPortNumber, inlineToolFailoverAction }
+	STATUS  current
+	DESCRIPTION
+			"Inline tool status change"
+	::= { notifications 451 }
+
+-- inline-toolchain status change  
+inlineToolchainStatusChange NOTIFICATION-TYPE
+	OBJECTS { module, severity, type, message, inlineToolchainName, inlineToolchainFailoverAction }
+	STATUS  current
+	DESCRIPTION
+			"Inline toolchain status change"
+	::= { notifications 452 }
+
+END

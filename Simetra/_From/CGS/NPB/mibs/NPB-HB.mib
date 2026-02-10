@@ -1,0 +1,147 @@
+NPB-HB DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+hbMib MODULE-IDENTITY
+    LAST-UPDATED "201611220000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201611220000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 8 }
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+HbDirection ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {a-b(0),b-a(1),bidirectional(2)}
+
+HbPktFormat ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {ipx(0),arp(1),custom(2)}
+
+-- heartbeat profiles
+heartbeat OBJECT IDENTIFIER ::= { hbMib 1 }
+
+heartbeatProfileTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF HeartbeatProfileEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Hearbeat profile configuration"
+    ::= { heartbeat 1 }
+
+heartbeatProfileEntry OBJECT-TYPE
+    SYNTAX      HeartbeatProfileEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED heartbeatProfileName }
+        ::= { heartbeatProfileTable 1 }
+
+HeartbeatProfileEntry ::=
+    SEQUENCE {
+        heartbeatProfileName String,
+        heartbeatProfileDescription String,
+        heartbeatProfilePktFormat HbPktFormat,
+        heartbeatProfilePktPattern String,
+        heartbeatProfileInterval Unsigned32,
+        heartbeatProfileTimeout Unsigned32,
+        heartbeatProfileRetry Unsigned32,
+        heartbeatProfileRecoveryCount Unsigned32,
+        heartbeatProfileDirection HbDirection,
+        heartbeatProfileRowstatus RowStatus
+    }
+
+heartbeatProfileName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "heartbeat profile name"
+    ::= { heartbeatProfileEntry 1 }
+
+heartbeatProfileDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Heartbeat profile description"
+    ::= { heartbeatProfileEntry 2 }
+
+heartbeatProfilePktFormat OBJECT-TYPE
+    SYNTAX      HbPktFormat
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Heartbeat packet format, could be either IPX, gratuitous ARP or user defined"
+    DEFVAL { ipx }
+    ::= { heartbeatProfileEntry 3 }
+
+heartbeatProfilePktPattern OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "user defined heartbeat packet. Up to 512 bytes length"
+    ::= { heartbeatProfileEntry 4 }
+
+heartbeatProfileInterval OBJECT-TYPE
+    SYNTAX      Unsigned32 (30 .. 5000)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "number of miliseconds between subsequent heartbeat packets"
+    DEFVAL { 1000 }
+    ::= { heartbeatProfileEntry 5 }
+
+heartbeatProfileTimeout OBJECT-TYPE
+    SYNTAX      Unsigned32 (20 .. 3000)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "number of msec to wait for a transmitted packet to return"
+    DEFVAL { 500 }
+    ::= { heartbeatProfileEntry 6 }
+
+heartbeatProfileRetry OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 5)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "number of timed out packets before failover"
+    DEFVAL { 3 }
+    ::= { heartbeatProfileEntry 7 }
+
+heartbeatProfileRecoveryCount OBJECT-TYPE
+    SYNTAX      Unsigned32 (1 .. 120)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "number of successfully received packets before recovering from failover"
+    DEFVAL { 3 }
+    ::= { heartbeatProfileEntry 8 }
+
+heartbeatProfileDirection OBJECT-TYPE
+    SYNTAX      HbDirection
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "heartbeat traffic direction"
+    DEFVAL { bidirectional }
+    ::= { heartbeatProfileEntry 9 }
+
+heartbeatProfileRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { heartbeatProfileEntry 11 }
+
+END

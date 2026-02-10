@@ -1,0 +1,255 @@
+NPB-GRE DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+greMib MODULE-IDENTITY
+    LAST-UPDATED "201611220000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201611220000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 5 }
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+CapabilitiesGre ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {max-num-of-gre-interface(99)}
+
+CapabilitiesIp ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {max-num-of-ip-interface(99)}
+
+GreTunnelType ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {l2(2)}
+
+-- Tunnel interfaces
+interface OBJECT IDENTIFIER ::= { greMib 1 }
+
+interfaceGreTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF InterfaceGreEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configure GRE tunnel interface"
+    ::= { interface 1 }
+
+interfaceGreEntry OBJECT-TYPE
+    SYNTAX      InterfaceGreEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { interfaceGreGreId }
+        ::= { interfaceGreTable 1 }
+
+InterfaceGreEntry ::=
+    SEQUENCE {
+        interfaceGreGreId Unsigned32,
+        interfaceGreIpv4Address IpAddress,
+        interfaceGreIpv4Peer IpAddress,
+        interfaceGreType GreTunnelType,
+        interfaceGreIpv4Gateway IpAddress,
+        interfaceGreName String,
+        interfaceGreDescription String,
+        interfaceGreBindPort String,
+        interfaceGreMacsGatewayMac String,
+        interfaceGreMacsLocalMac String,
+        interfaceGreRowstatus RowStatus
+    }
+
+interfaceGreGreId OBJECT-TYPE
+    SYNTAX      Unsigned32 (1 .. 99)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { interfaceGreEntry 1 }
+
+interfaceGreIpv4Address OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Local IP address for GRE tunneling"
+    ::= { interfaceGreEntry 2 }
+
+interfaceGreIpv4Peer OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Peer IP address for GRE tunneling"
+    ::= { interfaceGreEntry 3 }
+
+interfaceGreType OBJECT-TYPE
+    SYNTAX      GreTunnelType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel type"
+    DEFVAL { l2 }
+    ::= { interfaceGreEntry 4 }
+
+interfaceGreIpv4Gateway OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Default gateway of interface"
+    ::= { interfaceGreEntry 5 }
+
+interfaceGreName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface name"
+    ::= { interfaceGreEntry 6 }
+
+interfaceGreDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface description"
+    ::= { interfaceGreEntry 7 }
+
+interfaceGreBindPort OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface will use this port for network connectivity"
+    ::= { interfaceGreEntry 8 }
+
+interfaceGreMacsGatewayMac OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Default gateway MAC address"
+    ::= { interfaceGreEntry 9 }
+
+interfaceGreMacsLocalMac OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Local MAC address"
+    ::= { interfaceGreEntry 10 }
+
+interfaceGreRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { interfaceGreEntry 12 }
+
+interfaceIpTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF InterfaceIpEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configure IP interface"
+    ::= { interface 2 }
+
+interfaceIpEntry OBJECT-TYPE
+    SYNTAX      InterfaceIpEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { interfaceIpIpId }
+        ::= { interfaceIpTable 1 }
+
+InterfaceIpEntry ::=
+    SEQUENCE {
+        interfaceIpIpId Unsigned32,
+        interfaceIpIpv4Address IpAddress,
+        interfaceIpBindIp INTEGER,
+        interfaceIpIpv4Gateway IpAddress,
+        interfaceIpName String,
+        interfaceIpDescription String,
+        interfaceIpBindPort String,
+        interfaceIpMacsGatewayMac String,
+        interfaceIpMacsLocalMac String,
+        interfaceIpRowstatus RowStatus
+    }
+
+interfaceIpIpId OBJECT-TYPE
+    SYNTAX      Unsigned32 (1 .. 99)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { interfaceIpEntry 1 }
+
+interfaceIpIpv4Address OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Local IP address"
+    ::= { interfaceIpEntry 2 }
+
+interfaceIpBindIp OBJECT-TYPE
+    SYNTAX      INTEGER {enable(0),disable(1)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Apply interface bind IP address. Optional parameter, used when interface is set as filter input, in which filter will match packets with corresponding interface 'ipv4-address' IP."
+    DEFVAL { disable }
+    ::= { interfaceIpEntry 3 }
+
+interfaceIpIpv4Gateway OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Default gateway of interface"
+    ::= { interfaceIpEntry 4 }
+
+interfaceIpName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface name"
+    ::= { interfaceIpEntry 5 }
+
+interfaceIpDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface description"
+    ::= { interfaceIpEntry 6 }
+
+interfaceIpBindPort OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Interface will use this port for network connectivity"
+    ::= { interfaceIpEntry 7 }
+
+interfaceIpMacsGatewayMac OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Default gateway MAC address"
+    ::= { interfaceIpEntry 8 }
+
+interfaceIpMacsLocalMac OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Local MAC address"
+    ::= { interfaceIpEntry 9 }
+
+interfaceIpRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { interfaceIpEntry 11 }
+
+END

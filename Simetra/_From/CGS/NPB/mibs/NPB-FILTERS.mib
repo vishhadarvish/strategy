@@ -1,0 +1,2450 @@
+NPB-FILTERS DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+filtersMib MODULE-IDENTITY
+    LAST-UPDATED "201512280000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201512280000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 3 }
+
+UnsignedByte ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION "xs:unsignedByte"
+    SYNTAX      Unsigned32 (0 .. 255)
+
+UnsignedShort ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION "xs:unsignedShort"
+    SYNTAX      Unsigned32 (0 .. 65535)
+
+ConfdString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs: and confd: types mapped to strings"
+    SYNTAX      OCTET STRING
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+HexList ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1x:"
+    STATUS      current
+    DESCRIPTION "confd:hexList"
+    SYNTAX      OCTET STRING
+
+Fgroup ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "Filter group"
+    SYNTAX      OCTET STRING (SIZE (0 .. 16))
+
+FgroupCapabilities ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {max-num-of-filter-groups(99)}
+
+FilterAction ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {redirect(1),drop(2),copy(3)}
+
+FilterId ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (1 .. 3070)
+
+FilterLbOperMode ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {advanced(1),basic(2)}
+
+FilterModes ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {l2-l4-ipv4(1),l3-l4-ipv4-udf(2),l3-l4-ipv4-ipv6-mpls(3),l3-l4-ipv4-udf-vlb(4),l2-l4-ipv6(6)}
+
+FilterOperation ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {or(0),and(1)}
+
+GreInterface ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "GRE interface identifier"
+    SYNTAX      OCTET STRING
+
+IpFrag ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {any(0),first(1),not-first(2),none(3)}
+
+L3Ipv4Type ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IPv4 address or list of IPv4 addresses."
+    SYNTAX      OCTET STRING
+
+Ipv4WithPrefixMask ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IPv4 address with prefix or mask. Examples: '192.168.1.1/24', '192.168.1.1/255.255.255.0'"
+    SYNTAX      OCTET STRING
+
+L3Ipv6Type ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IPv6 address or list of IPv6 addresses."
+    SYNTAX      OCTET STRING
+
+Ipv6WithPrefixMask ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IPv6 address with prefix or mask. Examples: '1::1/64', '1::1/FFFF::FFFF'"
+    SYNTAX      OCTET STRING
+
+VlanAsString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "Vlan ID or a list of Vlan IDs. If 0 is used, untagged traffic will also be matched"
+    SYNTAX      OCTET STRING
+
+L2InnerVlanType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+L2MplsType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "MPLS label ID, or a list of MPLS lablel IDs."
+    SYNTAX      OCTET STRING
+
+L2VlanType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+L3DscpType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (1 .. 63)
+
+L3Ipv4SessionType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IPv4 address and L4 port or list of IPv4 addresses and L4 ports."
+    SYNTAX      OCTET STRING
+
+L3Ipv6SessionType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IPv6 address or list of IPv6 addresses."
+    SYNTAX      OCTET STRING
+
+L3ProtType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IP protocol number or list of IP protocol numbers."
+    SYNTAX      OCTET STRING
+
+L4PortListMaskType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "L4 Port number and mask, a list of l4 Port numbers and masks."
+    SYNTAX      OCTET STRING
+
+L4PortListRangeMaskType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "L4 Port number and mask, a list of l4 Port numbers and masks or a L4 port numbers range."
+    SYNTAX      OCTET STRING
+
+L4PortListRangeType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "L4 Port number, a list of l4 Port numbers or a L4 port numbers range."
+    SYNTAX      OCTET STRING
+
+L4PortType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+LbListAsString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+PacketOffset ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (0 .. 126)
+
+PacketStartPoint ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {l2(1),l3(2),l4(3),vlan(4),mpls(5),gre(6)}
+
+PacketUdfFormat ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {l2(1),l3-all(2),l4-all(3),vlan-all(4),mpls-all(5),vlan-untagged(6),vlan-single(7),vlan-double(8),mpls-one-label(9),mpls-two-label(10),mpls-three-label(11),mpls-four-label(12),mpls-more-than-four-label(13),l3-unknown(14),l3-known-non-ip(15),l3-ipv4-non-opt(16),l3-ipv4-with-opt(17),l3-ipv4-frag-non-opt(18),l3-ipv4-frag-with-opt(19),l3-ipv6(20),l4-unknown(21),l4-udp(22),l4-tcp(23),l4-sctp(24),gre-all(25),gre-l3-header-4-bytes(26),gre-l3-header-8-bytes(27),gre-l3-header-12-bytes(28),gre-l3-header-16-bytes(29),gre-l3-header-20-bytes(30),gre-l2-header-4-bytes(31),gre-l2-header-8-bytes(32),gre-l2-header-12-bytes(33),gre-l2-header-16-bytes(34),gre-l2-header-20-bytes(35)}
+
+PktLenRange ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "IP packet length. Including IP header and IP payload."
+    SYNTAX      OCTET STRING
+
+TunnelL4PortType ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+UdfLeafref ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING (SIZE (1 .. 32))
+
+UdfPattern ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+UdfTunnel ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {l2tp(1),none(2),gre(3),gre-ipv6(5),mpls(6),gtp(7),gtp-ipv4-and-ipv6-src-msb(8),gtp-ipv4-ipv6-dst-msb(9),pppoe(10)}
+
+UdfTunnelTerm ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {none(1),mpls-l2(2),mpls-l3(3)}
+
+VlanRangeString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "Vlan-ID-range"
+    SYNTAX      OCTET STRING
+
+VlbSource ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {primary(0),secondary(1)}
+
+Capabilities ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {max-num-of-filters(3070)}
+
+MacAddress ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1x:"
+    STATUS      current
+    DESCRIPTION "Mac address"
+    SYNTAX      OCTET STRING (SIZE (6 .. 6))
+
+-- Configure an ordered list of traffic management filters
+filters OBJECT IDENTIFIER ::= { filtersMib 1 }
+
+-- Filter groups
+filtersGroups OBJECT IDENTIFIER ::= { filters 1 }
+
+filtersMode OBJECT-TYPE
+    SYNTAX      FilterModes
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Select the available filter qualifiers."
+    ::= { filters 2 }
+
+filtersModes OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Display filters modes capabilities."
+    ::= { filters 3 }
+
+-- User Defined Fragment windows
+filtersUdfWindow OBJECT IDENTIFIER ::= { filters 4 }
+
+filtersUdfWindowTunnel OBJECT-TYPE
+    SYNTAX      UdfTunnel
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "UDF Tunnel type selection"
+    ::= { filtersUdfWindow 1 }
+
+filtersUdfWindowTunnelsInfo OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Display tunnels UDF Information"
+    ::= { filtersUdfWindow 2 }
+
+filtersUdfWindowFormatsInfo OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Display UDF formats Information"
+    ::= { filtersUdfWindow 3 }
+
+filtersLbOperMode OBJECT-TYPE
+    SYNTAX      FilterLbOperMode
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Select filters and lb groups operation mode"
+    ::= { filters 5 }
+
+filtersClear OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Set this value to 'true' in order to clear all ports statistics"
+    ::= { filters 6 }
+
+filtersTouch OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filters 7 }
+
+-- Filters memory usage
+filterMemory OBJECT IDENTIFIER ::= { filtersMib 2 }
+
+filterMemoryAvailableRanges OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 1 }
+
+filterMemoryUsedRanges OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 2 }
+
+filterMemoryTotalRanges OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 3 }
+
+filterMemoryTotalRangesPerc OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 4 }
+
+filterMemoryAvailableEm OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 5 }
+
+filterMemoryUsedEm OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 6 }
+
+filterMemoryTotalEm OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 7 }
+
+filterMemoryTotalEmPerc OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 8 }
+
+filterMemoryAvailableSlices OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 9 }
+
+filterMemoryUsedSlices OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 10 }
+
+filterMemoryTotalSlices OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 11 }
+
+filterMemoryTotalSlicesPerc OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 12 }
+
+filterMemoryAvailableFilters OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 13 }
+
+filterMemoryUsedFilters OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 14 }
+
+filterMemoryTotalFilters OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 15 }
+
+filterMemoryTotalFiltersPerc OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 16 }
+
+filterMemoryAvailableIntFilters OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 17 }
+
+filterMemoryUsedIntFilters OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 18 }
+
+filterMemoryTotalIntFilters OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 19 }
+
+filterMemoryTotalIntFiltersPerc OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 20 }
+
+filterMemoryHwUpdate OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filterMemory 21 }
+
+filtersFilterTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersFilterEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configure a traffic management filter"
+    ::= { filters 8 }
+
+filtersFilterEntry OBJECT-TYPE
+    SYNTAX      FiltersFilterEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { filtersFilterFilterId }
+        ::= { filtersFilterTable 1 }
+
+FiltersFilterEntry ::=
+    SEQUENCE {
+        filtersFilterFilterId FilterId,
+        filtersFilterGroup Fgroup,
+        filtersFilterCreatedBy String,
+        filtersFilterStatsHitsPackets Counter64,
+        filtersFilterStatsHitsBytes Counter64,
+        filtersFilterStatsHitsPps Counter64,
+        filtersFilterStatsHitsBps Counter64,
+        filtersFilterUsedHwFilters Integer32,
+        filtersFilterAdmin INTEGER,
+        filtersFilterName String,
+        filtersFilterDescription String,
+        filtersFilterAction FilterAction,
+        filtersFilterOperator FilterOperation,
+        filtersFilterTags ConfdString,
+        filtersFilterL2InnerVlanMask String,
+        filtersFilterL2MplsLabel1 L2MplsType,
+        filtersFilterL2MplsLabel1Mask String,
+        filtersFilterL2MplsLabel2 L2MplsType,
+        filtersFilterL2MplsLabel2Mask String,
+        filtersFilterL2MplsLabel3 L2MplsType,
+        filtersFilterL2MplsLabel3Mask String,
+        filtersFilterL2MplsLabel4 L2MplsType,
+        filtersFilterL2MplsLabel4Mask String,
+        filtersFilterL3PktLen PktLenRange,
+        filtersFilterL3Ipv4SrcNetmask IpAddress,
+        filtersFilterL3Ipv4DstNetmask IpAddress,
+        filtersFilterL3Ipv6SrcPrefix Unsigned32,
+        filtersFilterL3Ipv6DstPrefix Unsigned32,
+        filtersFilterTunnelL2tp TruthValue,
+        filtersFilterTunnelGre TruthValue,
+        filtersFilterTunnelMpls TruthValue,
+        filtersFilterTunnelPppoe TruthValue,
+        filtersFilterGtpMsgType UnsignedByte,
+        filtersFilterGtpTeid String,
+        filtersFilterGtpTeidMask String,
+        filtersFilterTunnelIpv4SrcNetmask IpAddress,
+        filtersFilterTunnelIpv4DstNetmask IpAddress,
+        filtersFilterTunnelIpv6SrcPrefix Unsigned32,
+        filtersFilterTunnelIpv6DstPrefix Unsigned32,
+        filtersFilterTunnelL4SportMask String,
+        filtersFilterTunnelL4DportMask String,
+        filtersFilterNot ConfdString,
+        filtersFilterL2Ethertype String,
+        filtersFilterL2Smac HexList,
+        filtersFilterL2SmacMask HexList,
+        filtersFilterL2Dmac HexList,
+        filtersFilterL2DmacMask HexList,
+        filtersFilterL2Vlan L2VlanType,
+        filtersFilterL2InnerVlan L2InnerVlanType,
+        filtersFilterL3Frag IpFrag,
+        filtersFilterL3ProtocolNumber L3ProtType,
+        filtersFilterL3Dscp L3DscpType,
+        filtersFilterL3Ipv4Addr L3Ipv4Type,
+        filtersFilterL3IpList String,
+        filtersFilterL3IpSrcList String,
+        filtersFilterL3IpDstList String,
+        filtersFilterL3Ipv4SrcAddr L3Ipv4Type,
+        filtersFilterL3Ipv4DstAddr L3Ipv4Type,
+        filtersFilterL3Ipv6Addr L3Ipv6Type,
+        filtersFilterL3Ipv6SrcAddr L3Ipv6Type,
+        filtersFilterL3Ipv6DstAddr L3Ipv6Type,
+        filtersFilterL4Port L4PortType,
+        filtersFilterL4Sport L4PortType,
+        filtersFilterL4Dport L4PortType,
+        filtersFilterL3Ipv4Session L3Ipv4SessionType,
+        filtersFilterL3Ipv4SrcSession L3Ipv4SessionType,
+        filtersFilterL3Ipv4DstSession L3Ipv4SessionType,
+        filtersFilterL3Ipv6Session L3Ipv6SessionType,
+        filtersFilterL3Ipv6SrcSession L3Ipv6SessionType,
+        filtersFilterL3Ipv6DstSession L3Ipv6SessionType,
+        filtersFilterL4TcpflagUrg TruthValue,
+        filtersFilterL4TcpflagAck TruthValue,
+        filtersFilterL4TcpflagPsh TruthValue,
+        filtersFilterL4TcpflagRst TruthValue,
+        filtersFilterL4TcpflagSyn TruthValue,
+        filtersFilterL4TcpflagFin TruthValue,
+        filtersFilterTunnelGtp TruthValue,
+        filtersFilterTunnelProtocolNumber L3ProtType,
+        filtersFilterTunnelIpv4Addr L3Ipv4Type,
+        filtersFilterTunnelIpv4SrcAddr L3Ipv4Type,
+        filtersFilterTunnelIpv4DstAddr L3Ipv4Type,
+        filtersFilterTunnelIpv6Addr L3Ipv6Type,
+        filtersFilterTunnelIpv6SrcAddr L3Ipv6Type,
+        filtersFilterTunnelIpv6DstAddr L3Ipv6Type,
+        filtersFilterTunnelL4Port TunnelL4PortType,
+        filtersFilterTunnelL4Sport TunnelL4PortType,
+        filtersFilterTunnelL4Dport TunnelL4PortType,
+        filtersFilterSetSlice UnsignedShort,
+        filtersFilterSetTimestamp TruthValue,
+        filtersFilterVlanSetOuter UnsignedShort,
+        filtersFilterSetVirtualLb VlanRangeString,
+        filtersFilterSetVirtualLbSource VlbSource,
+        filtersFilterBidirectional TruthValue,
+        filtersFilterSmacReplace MacAddress,
+        filtersFilterDmacReplace MacAddress,
+        filtersFilterInputPorts String,
+        filtersFilterInputInterface GreInterface,
+        filtersFilterInputLbGroup LbListAsString,
+        filtersFilterOutputPorts String,
+        filtersFilterOutputLbGroup LbListAsString,
+        filtersFilterOutputInterface GreInterface,
+        filtersFilterInline String,
+        filtersFilterRowstatus RowStatus
+    }
+
+filtersFilterFilterId OBJECT-TYPE
+    SYNTAX      FilterId
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Unique filter id"
+    ::= { filtersFilterEntry 1 }
+
+filtersFilterGroup OBJECT-TYPE
+    SYNTAX      Fgroup
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter group"
+    ::= { filtersFilterEntry 2 }
+
+filtersFilterCreatedBy OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 255))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter creator"
+    ::= { filtersFilterEntry 3 }
+
+filtersFilterStatsHitsPackets OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of packets hits by this filter"
+    ::= { filtersFilterEntry 4 }
+
+filtersFilterStatsHitsBytes OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of bytes hits by this filter"
+    ::= { filtersFilterEntry 5 }
+
+filtersFilterStatsHitsPps OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of packets hits by this filter in last second"
+    ::= { filtersFilterEntry 6 }
+
+filtersFilterStatsHitsBps OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of bits hits by this filter in last second"
+    ::= { filtersFilterEntry 7 }
+
+filtersFilterUsedHwFilters OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersFilterEntry 8 }
+
+filtersFilterAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the filter's admin status"
+    ::= { filtersFilterEntry 9 }
+
+filtersFilterName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 48))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter's name"
+    ::= { filtersFilterEntry 10 }
+
+filtersFilterDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the filter's description"
+    ::= { filtersFilterEntry 11 }
+
+filtersFilterAction OBJECT-TYPE
+    SYNTAX      FilterAction
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the action to take when the filter matches"
+    ::= { filtersFilterEntry 12 }
+
+filtersFilterOperator OBJECT-TYPE
+    SYNTAX      FilterOperation
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set classifiers operator"
+    ::= { filtersFilterEntry 13 }
+
+filtersFilterTags OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter tags"
+    ::= { filtersFilterEntry 14 }
+
+filtersFilterL2InnerVlanMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inner vlan mask"
+    ::= { filtersFilterEntry 15 }
+
+filtersFilterL2MplsLabel1 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "First MPLS label(s)"
+    ::= { filtersFilterEntry 16 }
+
+filtersFilterL2MplsLabel1Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "First MPLS label mask"
+    ::= { filtersFilterEntry 17 }
+
+filtersFilterL2MplsLabel2 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Second MPLS label(s)"
+    ::= { filtersFilterEntry 18 }
+
+filtersFilterL2MplsLabel2Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Second MPLS label mask"
+    ::= { filtersFilterEntry 19 }
+
+filtersFilterL2MplsLabel3 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Third MPLS label(s)"
+    ::= { filtersFilterEntry 20 }
+
+filtersFilterL2MplsLabel3Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Third MPLS label mask"
+    ::= { filtersFilterEntry 21 }
+
+filtersFilterL2MplsLabel4 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Fourth MPLS label(s)"
+    ::= { filtersFilterEntry 22 }
+
+filtersFilterL2MplsLabel4Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Fourth MPLS label mask"
+    ::= { filtersFilterEntry 23 }
+
+filtersFilterL3PktLen OBJECT-TYPE
+    SYNTAX      PktLenRange
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L3 total length"
+    ::= { filtersFilterEntry 24 }
+
+filtersFilterL3Ipv4SrcNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv4 src netmask use l3-ipv4-src-addr field"
+    ::= { filtersFilterEntry 25 }
+
+filtersFilterL3Ipv4DstNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv4 dst netmask use l3-ipv4-dst-addr field"
+    ::= { filtersFilterEntry 26 }
+
+filtersFilterL3Ipv6SrcPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv6 src prefix use l3-ipv6-src-addr field"
+    ::= { filtersFilterEntry 27 }
+
+filtersFilterL3Ipv6DstPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv6 dst prefix use l3-ipv6-dst-addr field"
+    ::= { filtersFilterEntry 28 }
+
+filtersFilterTunnelL2tp OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel L2TP (Destination port 1701)"
+    ::= { filtersFilterEntry 29 }
+
+filtersFilterTunnelGre OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel GRE (IP protocol type 47)"
+    ::= { filtersFilterEntry 30 }
+
+filtersFilterTunnelMpls OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel MPLS for traffic contains IPv4 over mpls (up to 3 mpls lables)"
+    ::= { filtersFilterEntry 31 }
+
+filtersFilterTunnelPppoe OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel PPPoE for traffic contains IPv4 over PPPoE header"
+    ::= { filtersFilterEntry 32 }
+
+filtersFilterGtpMsgType OBJECT-TYPE
+    SYNTAX      UnsignedByte (1 .. 255)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "GTP header message type"
+    ::= { filtersFilterEntry 33 }
+
+filtersFilterGtpTeid OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "GTP header tunnel endpoint ID"
+    ::= { filtersFilterEntry 34 }
+
+filtersFilterGtpTeidMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "GTP header tunnel endpoint ID header"
+    ::= { filtersFilterEntry 35 }
+
+filtersFilterTunnelIpv4SrcNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv4 src netmask use tunnel-ipv4-src-addr field"
+    ::= { filtersFilterEntry 36 }
+
+filtersFilterTunnelIpv4DstNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv4 dst netmask use tunnel-ipv4-dst-addr field"
+    ::= { filtersFilterEntry 37 }
+
+filtersFilterTunnelIpv6SrcPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv6 src prefix use tunnel-ipv6-src-addr field"
+    ::= { filtersFilterEntry 38 }
+
+filtersFilterTunnelIpv6DstPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv6 dst prefix use tunnel-ipv6-dst-addr field"
+    ::= { filtersFilterEntry 39 }
+
+filtersFilterTunnelL4SportMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel l4 sport mask use tunnel-l4-sport field"
+    ::= { filtersFilterEntry 40 }
+
+filtersFilterTunnelL4DportMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel l4 dport mask use tunnel-l4-dport field"
+    ::= { filtersFilterEntry 41 }
+
+filtersFilterNot OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of classifiers with not value"
+    ::= { filtersFilterEntry 42 }
+
+filtersFilterL2Ethertype OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L2 EtherType value"
+    ::= { filtersFilterEntry 43 }
+
+filtersFilterL2Smac OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Source MAC address"
+    ::= { filtersFilterEntry 44 }
+
+filtersFilterL2SmacMask OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Source MAC address mask"
+    ::= { filtersFilterEntry 45 }
+
+filtersFilterL2Dmac OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Destination MAC address"
+    ::= { filtersFilterEntry 46 }
+
+filtersFilterL2DmacMask OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Destination MAC address mask"
+    ::= { filtersFilterEntry 47 }
+
+filtersFilterL2Vlan OBJECT-TYPE
+    SYNTAX      L2VlanType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Vlan classifier value"
+    ::= { filtersFilterEntry 48 }
+
+filtersFilterL2InnerVlan OBJECT-TYPE
+    SYNTAX      L2InnerVlanType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inner vlan classifier value"
+    ::= { filtersFilterEntry 49 }
+
+filtersFilterL3Frag OBJECT-TYPE
+    SYNTAX      IpFrag
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IP fragmented packet"
+    ::= { filtersFilterEntry 50 }
+
+filtersFilterL3ProtocolNumber OBJECT-TYPE
+    SYNTAX      L3ProtType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IP protocol numbers"
+    ::= { filtersFilterEntry 51 }
+
+filtersFilterL3Dscp OBJECT-TYPE
+    SYNTAX      L3DscpType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Differentiated services field value in IP header"
+    ::= { filtersFilterEntry 52 }
+
+filtersFilterL3Ipv4Addr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source or destination addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 53 }
+
+filtersFilterL3IpList OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of IP addresses"
+    ::= { filtersFilterEntry 54 }
+
+filtersFilterL3IpSrcList OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of IP srouce addresses"
+    ::= { filtersFilterEntry 55 }
+
+filtersFilterL3IpDstList OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of IP destination addresses"
+    ::= { filtersFilterEntry 56 }
+
+filtersFilterL3Ipv4SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 57 }
+
+filtersFilterL3Ipv4DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 destination addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 58 }
+
+filtersFilterL3Ipv6Addr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source or destination addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 59 }
+
+filtersFilterL3Ipv6SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 60 }
+
+filtersFilterL3Ipv6DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 destination addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 61 }
+
+filtersFilterL4Port OBJECT-TYPE
+    SYNTAX      L4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L4 source or destination port numbers"
+    ::= { filtersFilterEntry 62 }
+
+filtersFilterL4Sport OBJECT-TYPE
+    SYNTAX      L4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L4 source port numbers"
+    ::= { filtersFilterEntry 63 }
+
+filtersFilterL4Dport OBJECT-TYPE
+    SYNTAX      L4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L4 destination port numbers"
+    ::= { filtersFilterEntry 64 }
+
+filtersFilterL3Ipv4Session OBJECT-TYPE
+    SYNTAX      L3Ipv4SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv4 source or destination sessions. A valid session consists of a pair of valid IPv4 address with an optional mask or CIDR followed by a ':', and a valid L4 port number"
+    ::= { filtersFilterEntry 65 }
+
+filtersFilterL3Ipv4SrcSession OBJECT-TYPE
+    SYNTAX      L3Ipv4SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv4 source sessions. A valid session consists of a pair of valid IPv4 address with an optional mask or CIDR followed by a ':', and a valid L4 port number"
+    ::= { filtersFilterEntry 66 }
+
+filtersFilterL3Ipv4DstSession OBJECT-TYPE
+    SYNTAX      L3Ipv4SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv4 destination sessions. A valid session consists of a pair of valid IPv4 address with an optional mask or CIDR followed by a ':', and a valid L4 port number"
+    ::= { filtersFilterEntry 67 }
+
+filtersFilterL3Ipv6Session OBJECT-TYPE
+    SYNTAX      L3Ipv6SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv6 source or destination sessions. A valid session consists of a pair of valid IPv6 address with an optional mask or CIDR surrounded with [ ], followed by a ':', and a valid L4 port number"
+    ::= { filtersFilterEntry 68 }
+
+filtersFilterL3Ipv6SrcSession OBJECT-TYPE
+    SYNTAX      L3Ipv6SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv6 source sessions. A valid session consists of a pair of valid IPv6 address with an optional mask or CIDR surrounded with [ ], followed by a ':', and a valid L4 port number"
+    ::= { filtersFilterEntry 69 }
+
+filtersFilterL3Ipv6DstSession OBJECT-TYPE
+    SYNTAX      L3Ipv6SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv6 destination sessions. A valid session consists of a pair of valid IPv6 address with an optional mask or CIDR surrounded with [ ], followed by a ':', and a valid L4 port number"
+    ::= { filtersFilterEntry 70 }
+
+filtersFilterL4TcpflagUrg OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP urgent flag"
+    ::= { filtersFilterEntry 71 }
+
+filtersFilterL4TcpflagAck OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP packet acknowledge flag"
+    ::= { filtersFilterEntry 72 }
+
+filtersFilterL4TcpflagPsh OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP priority flag"
+    ::= { filtersFilterEntry 73 }
+
+filtersFilterL4TcpflagRst OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP reset flag"
+    ::= { filtersFilterEntry 74 }
+
+filtersFilterL4TcpflagSyn OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP new connection flag"
+    ::= { filtersFilterEntry 75 }
+
+filtersFilterL4TcpflagFin OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP connection termination flag"
+    ::= { filtersFilterEntry 76 }
+
+filtersFilterTunnelGtp OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel GTP (UDP destination port 2152)"
+    ::= { filtersFilterEntry 77 }
+
+filtersFilterTunnelProtocolNumber OBJECT-TYPE
+    SYNTAX      L3ProtType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of tunneled IPv4 protocol numbers"
+    ::= { filtersFilterEntry 78 }
+
+filtersFilterTunnelIpv4Addr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source or destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 79 }
+
+filtersFilterTunnelIpv4SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source tunnel addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 80 }
+
+filtersFilterTunnelIpv4DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 81 }
+
+filtersFilterTunnelIpv6Addr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source or destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 82 }
+
+filtersFilterTunnelIpv6SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source tunnel addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 83 }
+
+filtersFilterTunnelIpv6DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersFilterEntry 84 }
+
+filtersFilterTunnelL4Port OBJECT-TYPE
+    SYNTAX      TunnelL4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel l4 source or destination port numbers"
+    ::= { filtersFilterEntry 85 }
+
+filtersFilterTunnelL4Sport OBJECT-TYPE
+    SYNTAX      TunnelL4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel l4 source port numbers"
+    ::= { filtersFilterEntry 86 }
+
+filtersFilterTunnelL4Dport OBJECT-TYPE
+    SYNTAX      TunnelL4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel l4 destination port numbers"
+    ::= { filtersFilterEntry 87 }
+
+filtersFilterSetSlice OBJECT-TYPE
+    SYNTAX      UnsignedShort (192 .. 192)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Slice matched packets to a given size"
+    ::= { filtersFilterEntry 88 }
+
+filtersFilterSetTimestamp OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Add timestamp trailer to matched packets"
+    ::= { filtersFilterEntry 89 }
+
+filtersFilterVlanSetOuter OBJECT-TYPE
+    SYNTAX      UnsignedShort (1 .. 4094)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set outer VLAN ID of filter match packets"
+    ::= { filtersFilterEntry 90 }
+
+filtersFilterSetVirtualLb OBJECT-TYPE
+    SYNTAX      VlanRangeString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Mark packets vlan tags according to lb hash"
+    ::= { filtersFilterEntry 91 }
+
+filtersFilterSetVirtualLbSource OBJECT-TYPE
+    SYNTAX      VlbSource
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set source of set-virtual-lb marking. Primary will act the same as lb-group operation, secondary will use different ditsribution. "
+    ::= { filtersFilterEntry 92 }
+
+filtersFilterBidirectional OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Packet will be redirected from output to input as well"
+    ::= { filtersFilterEntry 93 }
+
+filtersFilterSmacReplace OBJECT-TYPE
+    SYNTAX      MacAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Replace source MAC of filter match packets"
+    ::= { filtersFilterEntry 94 }
+
+filtersFilterDmacReplace OBJECT-TYPE
+    SYNTAX      MacAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Replace destination MAC of filter match packets"
+    ::= { filtersFilterEntry 95 }
+
+filtersFilterInputPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Input ports classifier"
+    ::= { filtersFilterEntry 96 }
+
+filtersFilterInputInterface OBJECT-TYPE
+    SYNTAX      GreInterface
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the input interface for this filter"
+    ::= { filtersFilterEntry 97 }
+
+filtersFilterInputLbGroup OBJECT-TYPE
+    SYNTAX      LbListAsString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the input load-balance groups for this bidirectioanl filter"
+    ::= { filtersFilterEntry 98 }
+
+filtersFilterOutputPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Output ports classifier"
+    ::= { filtersFilterEntry 99 }
+
+filtersFilterOutputLbGroup OBJECT-TYPE
+    SYNTAX      LbListAsString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the output load-balance groups for this filter"
+    ::= { filtersFilterEntry 100 }
+
+filtersFilterOutputInterface OBJECT-TYPE
+    SYNTAX      GreInterface
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the output interface for this filter"
+    ::= { filtersFilterEntry 101 }
+
+filtersFilterInline OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 48))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inline tool, toolchain or inline load balance group, with which the filter is redirected"
+    ::= { filtersFilterEntry 102 }
+
+filtersFilterRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersFilterEntry 105 }
+
+filtersFilterUdfTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersFilterUdfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "User defined filters pattern and mask"
+    ::= { filtersMib 3 }
+
+filtersFilterUdfEntry OBJECT-TYPE
+    SYNTAX      FiltersFilterUdfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { filtersFilterFilterId, IMPLIED filtersFilterUdfName }
+        ::= { filtersFilterUdfTable 1 }
+
+FiltersFilterUdfEntry ::=
+    SEQUENCE {
+        filtersFilterUdfName UdfLeafref,
+        filtersFilterUdfPattern UdfPattern,
+        filtersFilterUdfRowstatus RowStatus
+    }
+
+filtersFilterUdfName OBJECT-TYPE
+    SYNTAX      UdfLeafref
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "UDF name"
+    ::= { filtersFilterUdfEntry 1 }
+
+filtersFilterUdfPattern OBJECT-TYPE
+    SYNTAX      UdfPattern
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Search for this 2-16 bytes pattern according to global UDF window"
+    ::= { filtersFilterUdfEntry 2 }
+
+filtersFilterUdfRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersFilterUdfEntry 4 }
+
+filtersIpListTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersIpListEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configure filter ip lists to be loaded to filter"
+    ::= { filters 9 }
+
+filtersIpListEntry OBJECT-TYPE
+    SYNTAX      FiltersIpListEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED filtersIpListListName }
+        ::= { filtersIpListTable 1 }
+
+FiltersIpListEntry ::=
+    SEQUENCE {
+        filtersIpListListName String,
+        filtersIpListUseHw INTEGER,
+        filtersIpListTouch Unsigned32,
+        filtersIpListDescription String,
+        filtersIpListRowstatus RowStatus,
+        filtersIpListRulesNum Unsigned32
+    }
+
+filtersIpListListName OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersIpListEntry 1 }
+
+filtersIpListUseHw OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Use HW accelerator to allow large amount of addresses in this list."
+    ::= { filtersIpListEntry 2 }
+
+filtersIpListTouch OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    DEFVAL { 0 }
+    ::= { filtersIpListEntry 3 }
+
+filtersIpListDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set filter list description"
+    ::= { filtersIpListEntry 4 }
+
+filtersIpListRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersIpListEntry 7 }
+
+filtersIpListRulesNum OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "for show only"
+    ::= { filtersIpListEntry 8 }
+
+filtersGroupsGroupTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersGroupsGroupEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Filter group"
+    ::= { filtersGroups 1 }
+
+filtersGroupsGroupEntry OBJECT-TYPE
+    SYNTAX      FiltersGroupsGroupEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { filtersGroupsGroupName }
+        ::= { filtersGroupsGroupTable 1 }
+
+FiltersGroupsGroupEntry ::=
+    SEQUENCE {
+        filtersGroupsGroupName Fgroup,
+        filtersGroupsGroupDescription String,
+        filtersGroupsGroupContinueFiltersOnly TruthValue,
+        filtersGroupsGroupPermissions INTEGER,
+        filtersGroupsGroupRowstatus RowStatus,
+        filtersGroupsGroupNum Unsigned32
+    }
+
+filtersGroupsGroupName OBJECT-TYPE
+    SYNTAX      Fgroup
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Group name"
+    ::= { filtersGroupsGroupEntry 1 }
+
+filtersGroupsGroupDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 32))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Group description"
+    ::= { filtersGroupsGroupEntry 2 }
+
+filtersGroupsGroupContinueFiltersOnly OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This group can contain filters with 'continue' only"
+    ::= { filtersGroupsGroupEntry 3 }
+
+filtersGroupsGroupPermissions OBJECT-TYPE
+    SYNTAX      INTEGER {admin(0),oper(1)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Write permissions for group"
+    ::= { filtersGroupsGroupEntry 4 }
+
+filtersGroupsGroupRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersGroupsGroupEntry 6 }
+
+filtersGroupsGroupNum OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of filters"
+    ::= { filtersGroupsGroupEntry 7 }
+
+filtersGroupsGroupFilterTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersGroupsGroupFilterEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configure a traffic management filter"
+    ::= { filtersMib 4 }
+
+filtersGroupsGroupFilterEntry OBJECT-TYPE
+    SYNTAX      FiltersGroupsGroupFilterEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { filtersGroupsGroupName, filtersGroupsGroupFilterFilterId }
+        ::= { filtersGroupsGroupFilterTable 1 }
+
+FiltersGroupsGroupFilterEntry ::=
+    SEQUENCE {
+        filtersGroupsGroupFilterFilterId FilterId,
+        filtersGroupsGroupFilterGroup Fgroup,
+        filtersGroupsGroupFilterCreatedBy String,
+        filtersGroupsGroupFilterAdmin INTEGER,
+        filtersGroupsGroupFilterName String,
+        filtersGroupsGroupFilterDescription String,
+        filtersGroupsGroupFilterAction FilterAction,
+        filtersGroupsGroupFilterOperator FilterOperation,
+        filtersGroupsGroupFilterTags ConfdString,
+        filtersGroupsGroupFilterL2InnerVlanMask String,
+        filtersGroupsGroupFilterL2MplsLabel1 L2MplsType,
+        filtersGroupsGroupFilterL2MplsLabel1Mask String,
+        filtersGroupsGroupFilterL2MplsLabel2 L2MplsType,
+        filtersGroupsGroupFilterL2MplsLabel2Mask String,
+        filtersGroupsGroupFilterL2MplsLabel3 L2MplsType,
+        filtersGroupsGroupFilterL2MplsLabel3Mask String,
+        filtersGroupsGroupFilterL2MplsLabel4 L2MplsType,
+        filtersGroupsGroupFilterL2MplsLabel4Mask String,
+        filtersGroupsGroupFilterL3PktLen PktLenRange,
+        filtersGroupsGroupFilterL3Ipv4SrcNetmask IpAddress,
+        filtersGroupsGroupFilterL3Ipv4DstNetmask IpAddress,
+        filtersGroupsGroupFilterL3Ipv6SrcPrefix Unsigned32,
+        filtersGroupsGroupFilterL3Ipv6DstPrefix Unsigned32,
+        filtersGroupsGroupFilterTunnelL2tp TruthValue,
+        filtersGroupsGroupFilterTunnelGre TruthValue,
+        filtersGroupsGroupFilterTunnelMpls TruthValue,
+        filtersGroupsGroupFilterTunnelPppoe TruthValue,
+        filtersGroupsGroupFilterGtpMsgType UnsignedByte,
+        filtersGroupsGroupFilterGtpTeid String,
+        filtersGroupsGroupFilterGtpTeidMask String,
+        filtersGroupsGroupFilterTunnelIpv4SrcNetmask IpAddress,
+        filtersGroupsGroupFilterTunnelIpv4DstNetmask IpAddress,
+        filtersGroupsGroupFilterTunnelIpv6SrcPrefix Unsigned32,
+        filtersGroupsGroupFilterTunnelIpv6DstPrefix Unsigned32,
+        filtersGroupsGroupFilterTunnelL4SportMask String,
+        filtersGroupsGroupFilterTunnelL4DportMask String,
+        filtersGroupsGroupFilterNot ConfdString,
+        filtersGroupsGroupFilterL2Ethertype String,
+        filtersGroupsGroupFilterL2Smac HexList,
+        filtersGroupsGroupFilterL2SmacMask HexList,
+        filtersGroupsGroupFilterL2Dmac HexList,
+        filtersGroupsGroupFilterL2DmacMask HexList,
+        filtersGroupsGroupFilterL2Vlan L2VlanType,
+        filtersGroupsGroupFilterL2InnerVlan L2InnerVlanType,
+        filtersGroupsGroupFilterL3Frag IpFrag,
+        filtersGroupsGroupFilterL3ProtocolNumber L3ProtType,
+        filtersGroupsGroupFilterL3Dscp L3DscpType,
+        filtersGroupsGroupFilterL3Ipv4Addr L3Ipv4Type,
+        filtersGroupsGroupFilterL3IpList String,
+        filtersGroupsGroupFilterL3IpSrcList String,
+        filtersGroupsGroupFilterL3IpDstList String,
+        filtersGroupsGroupFilterL3Ipv4SrcAddr L3Ipv4Type,
+        filtersGroupsGroupFilterL3Ipv4DstAddr L3Ipv4Type,
+        filtersGroupsGroupFilterL3Ipv6Addr L3Ipv6Type,
+        filtersGroupsGroupFilterL3Ipv6SrcAddr L3Ipv6Type,
+        filtersGroupsGroupFilterL3Ipv6DstAddr L3Ipv6Type,
+        filtersGroupsGroupFilterL4Port L4PortType,
+        filtersGroupsGroupFilterL4Sport L4PortType,
+        filtersGroupsGroupFilterL4Dport L4PortType,
+        filtersGroupsGroupFilterL3Ipv4Session L3Ipv4SessionType,
+        filtersGroupsGroupFilterL3Ipv4SrcSession L3Ipv4SessionType,
+        filtersGroupsGroupFilterL3Ipv4DstSession L3Ipv4SessionType,
+        filtersGroupsGroupFilterL3Ipv6Session L3Ipv6SessionType,
+        filtersGroupsGroupFilterL3Ipv6SrcSession L3Ipv6SessionType,
+        filtersGroupsGroupFilterL3Ipv6DstSession L3Ipv6SessionType,
+        filtersGroupsGroupFilterL4TcpflagUrg TruthValue,
+        filtersGroupsGroupFilterL4TcpflagAck TruthValue,
+        filtersGroupsGroupFilterL4TcpflagPsh TruthValue,
+        filtersGroupsGroupFilterL4TcpflagRst TruthValue,
+        filtersGroupsGroupFilterL4TcpflagSyn TruthValue,
+        filtersGroupsGroupFilterL4TcpflagFin TruthValue,
+        filtersGroupsGroupFilterTunnelGtp TruthValue,
+        filtersGroupsGroupFilterTunnelProtocolNumber L3ProtType,
+        filtersGroupsGroupFilterTunnelIpv4Addr L3Ipv4Type,
+        filtersGroupsGroupFilterTunnelIpv4SrcAddr L3Ipv4Type,
+        filtersGroupsGroupFilterTunnelIpv4DstAddr L3Ipv4Type,
+        filtersGroupsGroupFilterTunnelIpv6Addr L3Ipv6Type,
+        filtersGroupsGroupFilterTunnelIpv6SrcAddr L3Ipv6Type,
+        filtersGroupsGroupFilterTunnelIpv6DstAddr L3Ipv6Type,
+        filtersGroupsGroupFilterTunnelL4Port TunnelL4PortType,
+        filtersGroupsGroupFilterTunnelL4Sport TunnelL4PortType,
+        filtersGroupsGroupFilterTunnelL4Dport TunnelL4PortType,
+        filtersGroupsGroupFilterSetSlice UnsignedShort,
+        filtersGroupsGroupFilterSetTimestamp TruthValue,
+        filtersGroupsGroupFilterVlanSetOuter UnsignedShort,
+        filtersGroupsGroupFilterSetVirtualLb VlanRangeString,
+        filtersGroupsGroupFilterSetVirtualLbSource VlbSource,
+        filtersGroupsGroupFilterBidirectional TruthValue,
+        filtersGroupsGroupFilterSmacReplace MacAddress,
+        filtersGroupsGroupFilterDmacReplace MacAddress,
+        filtersGroupsGroupFilterInputPorts String,
+        filtersGroupsGroupFilterInputInterface GreInterface,
+        filtersGroupsGroupFilterInputLbGroup LbListAsString,
+        filtersGroupsGroupFilterOutputPorts String,
+        filtersGroupsGroupFilterOutputLbGroup LbListAsString,
+        filtersGroupsGroupFilterOutputInterface GreInterface,
+        filtersGroupsGroupFilterInline String,
+        filtersGroupsGroupFilterRowstatus RowStatus
+    }
+
+filtersGroupsGroupFilterFilterId OBJECT-TYPE
+    SYNTAX      FilterId
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Unique filter id"
+    ::= { filtersGroupsGroupFilterEntry 1 }
+
+filtersGroupsGroupFilterGroup OBJECT-TYPE
+    SYNTAX      Fgroup
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter group"
+    ::= { filtersGroupsGroupFilterEntry 2 }
+
+filtersGroupsGroupFilterCreatedBy OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 255))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter creator"
+    ::= { filtersGroupsGroupFilterEntry 3 }
+
+filtersGroupsGroupFilterAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the filter's admin status"
+    ::= { filtersGroupsGroupFilterEntry 4 }
+
+filtersGroupsGroupFilterName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 48))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter's name"
+    ::= { filtersGroupsGroupFilterEntry 5 }
+
+filtersGroupsGroupFilterDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the filter's description"
+    ::= { filtersGroupsGroupFilterEntry 6 }
+
+filtersGroupsGroupFilterAction OBJECT-TYPE
+    SYNTAX      FilterAction
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the action to take when the filter matches"
+    ::= { filtersGroupsGroupFilterEntry 7 }
+
+filtersGroupsGroupFilterOperator OBJECT-TYPE
+    SYNTAX      FilterOperation
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set classifiers operator"
+    ::= { filtersGroupsGroupFilterEntry 8 }
+
+filtersGroupsGroupFilterTags OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Filter tags"
+    ::= { filtersGroupsGroupFilterEntry 9 }
+
+filtersGroupsGroupFilterL2InnerVlanMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inner vlan mask"
+    ::= { filtersGroupsGroupFilterEntry 10 }
+
+filtersGroupsGroupFilterL2MplsLabel1 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "First MPLS label(s)"
+    ::= { filtersGroupsGroupFilterEntry 11 }
+
+filtersGroupsGroupFilterL2MplsLabel1Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "First MPLS label mask"
+    ::= { filtersGroupsGroupFilterEntry 12 }
+
+filtersGroupsGroupFilterL2MplsLabel2 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Second MPLS label(s)"
+    ::= { filtersGroupsGroupFilterEntry 13 }
+
+filtersGroupsGroupFilterL2MplsLabel2Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Second MPLS label mask"
+    ::= { filtersGroupsGroupFilterEntry 14 }
+
+filtersGroupsGroupFilterL2MplsLabel3 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Third MPLS label(s)"
+    ::= { filtersGroupsGroupFilterEntry 15 }
+
+filtersGroupsGroupFilterL2MplsLabel3Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Third MPLS label mask"
+    ::= { filtersGroupsGroupFilterEntry 16 }
+
+filtersGroupsGroupFilterL2MplsLabel4 OBJECT-TYPE
+    SYNTAX      L2MplsType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Fourth MPLS label(s)"
+    ::= { filtersGroupsGroupFilterEntry 17 }
+
+filtersGroupsGroupFilterL2MplsLabel4Mask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Fourth MPLS label mask"
+    ::= { filtersGroupsGroupFilterEntry 18 }
+
+filtersGroupsGroupFilterL3PktLen OBJECT-TYPE
+    SYNTAX      PktLenRange
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L3 total length"
+    ::= { filtersGroupsGroupFilterEntry 19 }
+
+filtersGroupsGroupFilterL3Ipv4SrcNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv4 src netmask use l3-ipv4-src-addr field"
+    ::= { filtersGroupsGroupFilterEntry 20 }
+
+filtersGroupsGroupFilterL3Ipv4DstNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv4 dst netmask use l3-ipv4-dst-addr field"
+    ::= { filtersGroupsGroupFilterEntry 21 }
+
+filtersGroupsGroupFilterL3Ipv6SrcPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv6 src prefix use l3-ipv6-src-addr field"
+    ::= { filtersGroupsGroupFilterEntry 22 }
+
+filtersGroupsGroupFilterL3Ipv6DstPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting ipv6 dst prefix use l3-ipv6-dst-addr field"
+    ::= { filtersGroupsGroupFilterEntry 23 }
+
+filtersGroupsGroupFilterTunnelL2tp OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel L2TP (Destination port 1701)"
+    ::= { filtersGroupsGroupFilterEntry 24 }
+
+filtersGroupsGroupFilterTunnelGre OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel GRE (IP protocol type 47)"
+    ::= { filtersGroupsGroupFilterEntry 25 }
+
+filtersGroupsGroupFilterTunnelMpls OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel MPLS for traffic contains IPv4 over mpls (up to 3 mpls lables)"
+    ::= { filtersGroupsGroupFilterEntry 26 }
+
+filtersGroupsGroupFilterTunnelPppoe OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel PPPoE for traffic contains IPv4 over PPPoE header"
+    ::= { filtersGroupsGroupFilterEntry 27 }
+
+filtersGroupsGroupFilterGtpMsgType OBJECT-TYPE
+    SYNTAX      UnsignedByte (1 .. 255)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "GTP header message type"
+    ::= { filtersGroupsGroupFilterEntry 28 }
+
+filtersGroupsGroupFilterGtpTeid OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "GTP header tunnel endpoint ID"
+    ::= { filtersGroupsGroupFilterEntry 29 }
+
+filtersGroupsGroupFilterGtpTeidMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "GTP header tunnel endpoint ID header"
+    ::= { filtersGroupsGroupFilterEntry 30 }
+
+filtersGroupsGroupFilterTunnelIpv4SrcNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv4 src netmask use tunnel-ipv4-src-addr field"
+    ::= { filtersGroupsGroupFilterEntry 31 }
+
+filtersGroupsGroupFilterTunnelIpv4DstNetmask OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv4 dst netmask use tunnel-ipv4-dst-addr field"
+    ::= { filtersGroupsGroupFilterEntry 32 }
+
+filtersGroupsGroupFilterTunnelIpv6SrcPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv6 src prefix use tunnel-ipv6-src-addr field"
+    ::= { filtersGroupsGroupFilterEntry 33 }
+
+filtersGroupsGroupFilterTunnelIpv6DstPrefix OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 128)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel ipv6 dst prefix use tunnel-ipv6-dst-addr field"
+    ::= { filtersGroupsGroupFilterEntry 34 }
+
+filtersGroupsGroupFilterTunnelL4SportMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel l4 sport mask use tunnel-l4-sport field"
+    ::= { filtersGroupsGroupFilterEntry 35 }
+
+filtersGroupsGroupFilterTunnelL4DportMask OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "This field is deprecated\. For setting tunnel l4 dport mask use tunnel-l4-dport field"
+    ::= { filtersGroupsGroupFilterEntry 36 }
+
+filtersGroupsGroupFilterNot OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of classifiers with not value"
+    ::= { filtersGroupsGroupFilterEntry 37 }
+
+filtersGroupsGroupFilterL2Ethertype OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L2 EtherType value"
+    ::= { filtersGroupsGroupFilterEntry 38 }
+
+filtersGroupsGroupFilterL2Smac OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Source MAC address"
+    ::= { filtersGroupsGroupFilterEntry 39 }
+
+filtersGroupsGroupFilterL2SmacMask OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Source MAC address mask"
+    ::= { filtersGroupsGroupFilterEntry 40 }
+
+filtersGroupsGroupFilterL2Dmac OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Destination MAC address"
+    ::= { filtersGroupsGroupFilterEntry 41 }
+
+filtersGroupsGroupFilterL2DmacMask OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Destination MAC address mask"
+    ::= { filtersGroupsGroupFilterEntry 42 }
+
+filtersGroupsGroupFilterL2Vlan OBJECT-TYPE
+    SYNTAX      L2VlanType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Vlan classifier value"
+    ::= { filtersGroupsGroupFilterEntry 43 }
+
+filtersGroupsGroupFilterL2InnerVlan OBJECT-TYPE
+    SYNTAX      L2InnerVlanType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inner vlan classifier value"
+    ::= { filtersGroupsGroupFilterEntry 44 }
+
+filtersGroupsGroupFilterL3Frag OBJECT-TYPE
+    SYNTAX      IpFrag
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "IP fragmented packet"
+    ::= { filtersGroupsGroupFilterEntry 45 }
+
+filtersGroupsGroupFilterL3ProtocolNumber OBJECT-TYPE
+    SYNTAX      L3ProtType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IP protocol numbers"
+    ::= { filtersGroupsGroupFilterEntry 46 }
+
+filtersGroupsGroupFilterL3Dscp OBJECT-TYPE
+    SYNTAX      L3DscpType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Differentiated services field value in IP header"
+    ::= { filtersGroupsGroupFilterEntry 47 }
+
+filtersGroupsGroupFilterL3Ipv4Addr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source or destination addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 48 }
+
+filtersGroupsGroupFilterL3IpList OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of IP addresses"
+    ::= { filtersGroupsGroupFilterEntry 49 }
+
+filtersGroupsGroupFilterL3IpSrcList OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of IP srouce addresses"
+    ::= { filtersGroupsGroupFilterEntry 50 }
+
+filtersGroupsGroupFilterL3IpDstList OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 16))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "list of IP destination addresses"
+    ::= { filtersGroupsGroupFilterEntry 51 }
+
+filtersGroupsGroupFilterL3Ipv4SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 52 }
+
+filtersGroupsGroupFilterL3Ipv4DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 destination addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 53 }
+
+filtersGroupsGroupFilterL3Ipv6Addr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source or destination addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 54 }
+
+filtersGroupsGroupFilterL3Ipv6SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 55 }
+
+filtersGroupsGroupFilterL3Ipv6DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 destination addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 56 }
+
+filtersGroupsGroupFilterL4Port OBJECT-TYPE
+    SYNTAX      L4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L4 source or destination port numbers"
+    ::= { filtersGroupsGroupFilterEntry 57 }
+
+filtersGroupsGroupFilterL4Sport OBJECT-TYPE
+    SYNTAX      L4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L4 source port numbers"
+    ::= { filtersGroupsGroupFilterEntry 58 }
+
+filtersGroupsGroupFilterL4Dport OBJECT-TYPE
+    SYNTAX      L4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "L4 destination port numbers"
+    ::= { filtersGroupsGroupFilterEntry 59 }
+
+filtersGroupsGroupFilterL3Ipv4Session OBJECT-TYPE
+    SYNTAX      L3Ipv4SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv4 source or destination sessions. A valid session consists of a pair of valid IPv4 address with an optional mask or CIDR followed by a ':', and a valid L4 port number"
+    ::= { filtersGroupsGroupFilterEntry 60 }
+
+filtersGroupsGroupFilterL3Ipv4SrcSession OBJECT-TYPE
+    SYNTAX      L3Ipv4SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv4 source sessions. A valid session consists of a pair of valid IPv4 address with an optional mask or CIDR followed by a ':', and a valid L4 port number"
+    ::= { filtersGroupsGroupFilterEntry 61 }
+
+filtersGroupsGroupFilterL3Ipv4DstSession OBJECT-TYPE
+    SYNTAX      L3Ipv4SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv4 destination sessions. A valid session consists of a pair of valid IPv4 address with an optional mask or CIDR followed by a ':', and a valid L4 port number"
+    ::= { filtersGroupsGroupFilterEntry 62 }
+
+filtersGroupsGroupFilterL3Ipv6Session OBJECT-TYPE
+    SYNTAX      L3Ipv6SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv6 source or destination sessions. A valid session consists of a pair of valid IPv6 address with an optional mask or CIDR surrounded with [ ], followed by a ':', and a valid L4 port number"
+    ::= { filtersGroupsGroupFilterEntry 63 }
+
+filtersGroupsGroupFilterL3Ipv6SrcSession OBJECT-TYPE
+    SYNTAX      L3Ipv6SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv6 source sessions. A valid session consists of a pair of valid IPv6 address with an optional mask or CIDR surrounded with [ ], followed by a ':', and a valid L4 port number"
+    ::= { filtersGroupsGroupFilterEntry 64 }
+
+filtersGroupsGroupFilterL3Ipv6DstSession OBJECT-TYPE
+    SYNTAX      L3Ipv6SessionType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of valid IPv6 destination sessions. A valid session consists of a pair of valid IPv6 address with an optional mask or CIDR surrounded with [ ], followed by a ':', and a valid L4 port number"
+    ::= { filtersGroupsGroupFilterEntry 65 }
+
+filtersGroupsGroupFilterL4TcpflagUrg OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP urgent flag"
+    ::= { filtersGroupsGroupFilterEntry 66 }
+
+filtersGroupsGroupFilterL4TcpflagAck OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP packet acknowledge flag"
+    ::= { filtersGroupsGroupFilterEntry 67 }
+
+filtersGroupsGroupFilterL4TcpflagPsh OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP priority flag"
+    ::= { filtersGroupsGroupFilterEntry 68 }
+
+filtersGroupsGroupFilterL4TcpflagRst OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP reset flag"
+    ::= { filtersGroupsGroupFilterEntry 69 }
+
+filtersGroupsGroupFilterL4TcpflagSyn OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP new connection flag"
+    ::= { filtersGroupsGroupFilterEntry 70 }
+
+filtersGroupsGroupFilterL4TcpflagFin OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "TCP connection termination flag"
+    ::= { filtersGroupsGroupFilterEntry 71 }
+
+filtersGroupsGroupFilterTunnelGtp OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel GTP (UDP destination port 2152)"
+    ::= { filtersGroupsGroupFilterEntry 72 }
+
+filtersGroupsGroupFilterTunnelProtocolNumber OBJECT-TYPE
+    SYNTAX      L3ProtType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of tunneled IPv4 protocol numbers"
+    ::= { filtersGroupsGroupFilterEntry 73 }
+
+filtersGroupsGroupFilterTunnelIpv4Addr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source or destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 74 }
+
+filtersGroupsGroupFilterTunnelIpv4SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 source tunnel addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 75 }
+
+filtersGroupsGroupFilterTunnelIpv4DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv4Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv4 destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 76 }
+
+filtersGroupsGroupFilterTunnelIpv6Addr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source or destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 77 }
+
+filtersGroupsGroupFilterTunnelIpv6SrcAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 source tunnel addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 78 }
+
+filtersGroupsGroupFilterTunnelIpv6DstAddr OBJECT-TYPE
+    SYNTAX      L3Ipv6Type
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "A comma-separated list of IPv6 destination tunnel addresses with an optional mask or CIDR"
+    ::= { filtersGroupsGroupFilterEntry 79 }
+
+filtersGroupsGroupFilterTunnelL4Port OBJECT-TYPE
+    SYNTAX      TunnelL4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel l4 source or destination port numbers"
+    ::= { filtersGroupsGroupFilterEntry 80 }
+
+filtersGroupsGroupFilterTunnelL4Sport OBJECT-TYPE
+    SYNTAX      TunnelL4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel l4 source port numbers"
+    ::= { filtersGroupsGroupFilterEntry 81 }
+
+filtersGroupsGroupFilterTunnelL4Dport OBJECT-TYPE
+    SYNTAX      TunnelL4PortType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Tunnel l4 destination port numbers"
+    ::= { filtersGroupsGroupFilterEntry 82 }
+
+filtersGroupsGroupFilterSetSlice OBJECT-TYPE
+    SYNTAX      UnsignedShort (192 .. 192)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Slice matched packets to a given size"
+    ::= { filtersGroupsGroupFilterEntry 83 }
+
+filtersGroupsGroupFilterSetTimestamp OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Add timestamp trailer to matched packets"
+    ::= { filtersGroupsGroupFilterEntry 84 }
+
+filtersGroupsGroupFilterVlanSetOuter OBJECT-TYPE
+    SYNTAX      UnsignedShort (1 .. 4094)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set outer VLAN ID of filter match packets"
+    ::= { filtersGroupsGroupFilterEntry 85 }
+
+filtersGroupsGroupFilterSetVirtualLb OBJECT-TYPE
+    SYNTAX      VlanRangeString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Mark packets vlan tags according to lb hash"
+    ::= { filtersGroupsGroupFilterEntry 86 }
+
+filtersGroupsGroupFilterSetVirtualLbSource OBJECT-TYPE
+    SYNTAX      VlbSource
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set source of set-virtual-lb marking. Primary will act the same as lb-group operation, secondary will use different ditsribution. "
+    ::= { filtersGroupsGroupFilterEntry 87 }
+
+filtersGroupsGroupFilterBidirectional OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Packet will be redirected from output to input as well"
+    ::= { filtersGroupsGroupFilterEntry 88 }
+
+filtersGroupsGroupFilterSmacReplace OBJECT-TYPE
+    SYNTAX      MacAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Replace source MAC of filter match packets"
+    ::= { filtersGroupsGroupFilterEntry 89 }
+
+filtersGroupsGroupFilterDmacReplace OBJECT-TYPE
+    SYNTAX      MacAddress
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Replace destination MAC of filter match packets"
+    ::= { filtersGroupsGroupFilterEntry 90 }
+
+filtersGroupsGroupFilterInputPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Input ports classifier"
+    ::= { filtersGroupsGroupFilterEntry 91 }
+
+filtersGroupsGroupFilterInputInterface OBJECT-TYPE
+    SYNTAX      GreInterface
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the input interface for this filter"
+    ::= { filtersGroupsGroupFilterEntry 92 }
+
+filtersGroupsGroupFilterInputLbGroup OBJECT-TYPE
+    SYNTAX      LbListAsString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the input load-balance groups for this bidirectioanl filter"
+    ::= { filtersGroupsGroupFilterEntry 93 }
+
+filtersGroupsGroupFilterOutputPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Output ports classifier"
+    ::= { filtersGroupsGroupFilterEntry 94 }
+
+filtersGroupsGroupFilterOutputLbGroup OBJECT-TYPE
+    SYNTAX      LbListAsString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the output load-balance groups for this filter"
+    ::= { filtersGroupsGroupFilterEntry 95 }
+
+filtersGroupsGroupFilterOutputInterface OBJECT-TYPE
+    SYNTAX      GreInterface
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the output interface for this filter"
+    ::= { filtersGroupsGroupFilterEntry 96 }
+
+filtersGroupsGroupFilterInline OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 48))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Inline tool, toolchain or inline load balance group, with which the filter is redirected"
+    ::= { filtersGroupsGroupFilterEntry 97 }
+
+filtersGroupsGroupFilterRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersGroupsGroupFilterEntry 100 }
+
+filtersGroupsGroupFilterUdfTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersGroupsGroupFilterUdfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "User defined filters pattern and mask"
+    ::= { filtersMib 5 }
+
+filtersGroupsGroupFilterUdfEntry OBJECT-TYPE
+    SYNTAX      FiltersGroupsGroupFilterUdfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { filtersGroupsGroupName, filtersGroupsGroupFilterFilterId, IMPLIED filtersGroupsGroupFilterUdfName }
+        ::= { filtersGroupsGroupFilterUdfTable 1 }
+
+FiltersGroupsGroupFilterUdfEntry ::=
+    SEQUENCE {
+        filtersGroupsGroupFilterUdfName UdfLeafref,
+        filtersGroupsGroupFilterUdfPattern UdfPattern,
+        filtersGroupsGroupFilterUdfRowstatus RowStatus
+    }
+
+filtersGroupsGroupFilterUdfName OBJECT-TYPE
+    SYNTAX      UdfLeafref
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "UDF name"
+    ::= { filtersGroupsGroupFilterUdfEntry 1 }
+
+filtersGroupsGroupFilterUdfPattern OBJECT-TYPE
+    SYNTAX      UdfPattern
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Search for this 2-16 bytes pattern according to global UDF window"
+    ::= { filtersGroupsGroupFilterUdfEntry 2 }
+
+filtersGroupsGroupFilterUdfRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersGroupsGroupFilterUdfEntry 3 }
+
+filtersUdfWindowUdfTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FiltersUdfWindowUdfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "User defined filters"
+    ::= { filtersUdfWindow 4 }
+
+filtersUdfWindowUdfEntry OBJECT-TYPE
+    SYNTAX      FiltersUdfWindowUdfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED filtersUdfWindowUdfName }
+        ::= { filtersUdfWindowUdfTable 1 }
+
+FiltersUdfWindowUdfEntry ::=
+    SEQUENCE {
+        filtersUdfWindowUdfName String,
+        filtersUdfWindowUdfDescription String,
+        filtersUdfWindowUdfStartPoint PacketStartPoint,
+        filtersUdfWindowUdfOffset PacketOffset,
+        filtersUdfWindowUdfUsed String,
+        filtersUdfWindowUdfFormat PacketUdfFormat,
+        filtersUdfWindowUdfLength UnsignedByte,
+        filtersUdfWindowUdfTermFlow UdfTunnelTerm,
+        filtersUdfWindowUdfRowstatus RowStatus
+    }
+
+filtersUdfWindowUdfName OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 32))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "UDF name"
+    ::= { filtersUdfWindowUdfEntry 1 }
+
+filtersUdfWindowUdfDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 128))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "UDF description"
+    ::= { filtersUdfWindowUdfEntry 2 }
+
+filtersUdfWindowUdfStartPoint OBJECT-TYPE
+    SYNTAX      PacketStartPoint
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the UDF starting point"
+    DEFVAL { l2 }
+    ::= { filtersUdfWindowUdfEntry 3 }
+
+filtersUdfWindowUdfOffset OBJECT-TYPE
+    SYNTAX      PacketOffset
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the UDF starting offset, starting at start-point"
+    DEFVAL { 0 }
+    ::= { filtersUdfWindowUdfEntry 4 }
+
+filtersUdfWindowUdfUsed OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersUdfWindowUdfEntry 5 }
+
+filtersUdfWindowUdfFormat OBJECT-TYPE
+    SYNTAX      PacketUdfFormat
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the UDF format"
+    ::= { filtersUdfWindowUdfEntry 6 }
+
+filtersUdfWindowUdfLength OBJECT-TYPE
+    SYNTAX      UnsignedByte (1 .. 32)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "UDF length in bytes"
+    ::= { filtersUdfWindowUdfEntry 7 }
+
+filtersUdfWindowUdfTermFlow OBJECT-TYPE
+    SYNTAX      UdfTunnelTerm
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the tunnel termination flow"
+    DEFVAL { none }
+    ::= { filtersUdfWindowUdfEntry 8 }
+
+filtersUdfWindowUdfRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { filtersUdfWindowUdfEntry 9 }
+
+END

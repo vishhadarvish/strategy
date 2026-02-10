@@ -1,0 +1,23 @@
+NPB-2E DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb
+        FROM NPB-NPB
+;
+
+npb-2e MODULE-IDENTITY
+    LAST-UPDATED "201607100000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION "This module is the parent module for NPB-2E"
+    REVISION "201607100000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb 4 }
+
+END

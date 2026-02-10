@@ -1,0 +1,2271 @@
+NPB-PORTS DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+portsMib MODULE-IDENTITY
+    LAST-UPDATED "201512240000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201512240000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 2 }
+
+UnsignedShort ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION "xs:unsignedShort"
+    SYNTAX      Unsigned32 (0 .. 65535)
+
+ConfdString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs: and confd: types mapped to strings"
+    SYNTAX      OCTET STRING
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+HexList ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1x:"
+    STATUS      current
+    DESCRIPTION "confd:hexList"
+    SYNTAX      OCTET STRING
+
+Capabilities ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {max-num-of-ports(1000)}
+
+BreakablePhyPortNum ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+BreakdownMaps ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {break4x1(1000),break4x10(10000),break4x25(25000),break2x50(50000)}
+
+CopperPortDuplexConfig ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "duplex setting ;; full half"
+    SYNTAX      INTEGER {half(0),full(1)}
+
+FecStatus ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {enable(1),disable(2),cl91(3),cl108(4)}
+
+LinkStatusType ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {unknown(-1),down(0),up(1),receiveDown(2),forcedDown(3)}
+
+LogicalPortNum ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      OCTET STRING
+
+MplsTunnels ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {none(0),all(1),ip-over-mpls(2),eth-over-mpls(3),pwmcw-over-mpls(4)}
+
+PortRxTxModes ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {simplex(1),normal(2),loopback-internal(3),loopback-MAC(4)}
+
+PortSpeedConfig ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {speed1G(1000),speed10G(10000),speed25G(25000),speed40G(40000),speed50G(50000),speed100G(100000)}
+
+PrbsPolynomial ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION "pseudo random bit stream polynomial types"
+    SYNTAX      INTEGER {prbs7(7),prbs9(9),prbs11(11),prbs15(15),prbs23(23),prbs31(31),prbs58(58)}
+
+QsfpId ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (1 .. 32)
+
+SfpMonitorStatus ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {ok(1),warn(2),alrm(3),l-warn(4),l-alrm(5)}
+
+SfpPresentType ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {out(0),in(1)}
+
+SpeedLimit ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (0 .. 100000)
+
+Transceiver ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {unknown(0),sfp(1),sfp-plus(2),qsfp(3),qsfp-plus(4),qsfp28(5),dac(6),sfp-copper(7),qsfp-dd(8),sfp28(9)}
+
+-- Port configuration and status
+ports OBJECT IDENTIFIER ::= { portsMib 1 }
+
+-- Port breakout into logical sub-interfaces
+portsBreakout OBJECT IDENTIFIER ::= { ports 1 }
+
+portsIgnoreCrc OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Pass packets with bad CRC"
+    ::= { ports 2 }
+
+-- Global MPLS configuration, applies to all ports
+portsMpls OBJECT IDENTIFIER ::= { ports 3 }
+
+portsMplsRemoveMode OBJECT-TYPE
+    SYNTAX      MplsTunnels
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "MPLS header stripping mode"
+    ::= { portsMpls 1 }
+
+portsMplsL3SrcMac OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "MPLS L3 strip new source MAC address"
+    ::= { portsMpls 2 }
+
+portsMplsL3DstMac OBJECT-TYPE
+    SYNTAX      HexList (SIZE (6 .. 6))
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "MPLS L3 strip new destination MAC address"
+    ::= { portsMpls 3 }
+
+-- Port statistics counters
+portStatistics OBJECT IDENTIFIER ::= { portsMib 2 }
+
+-- Packet size statistics
+portStatisticsPacketSize OBJECT IDENTIFIER ::= { portStatistics 1 }
+
+-- Traffic types statistics
+portStatisticsTrafficTypes OBJECT IDENTIFIER ::= { portStatistics 2 }
+
+-- Errors statistics
+portStatisticsErrors OBJECT IDENTIFIER ::= { portStatistics 3 }
+
+-- Utilization statistics
+portStatisticsUtilization OBJECT IDENTIFIER ::= { portStatistics 4 }
+
+-- Port brief summary
+portStatisticsSummary OBJECT IDENTIFIER ::= { portStatistics 5 }
+
+portStatisticsClearAll OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Set this value to 'true' in order to clear all ports statistics"
+    ::= { portStatistics 6 }
+
+-- Port Pseudo Random Bit Stream Interface Statistics
+portStatisticsPrbs OBJECT IDENTIFIER ::= { portStatistics 7 }
+
+-- Port Forward Error Corrections Interface Statistics
+portStatisticsFec OBJECT IDENTIFIER ::= { portStatistics 8 }
+
+-- Port actions statistics
+portStatisticsActions OBJECT IDENTIFIER ::= { portStatistics 9 }
+
+-- Digital diagnostics monitoring information
+transceivers OBJECT IDENTIFIER ::= { portsMib 3 }
+
+portsBreakoutPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortsBreakoutPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Port breakout into logical sub-interfaces"
+    ::= { portsBreakout 1 }
+
+portsBreakoutPortEntry OBJECT-TYPE
+    SYNTAX      PortsBreakoutPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED portsBreakoutPortPhysicalPortNumber }
+        ::= { portsBreakoutPortTable 1 }
+
+PortsBreakoutPortEntry ::=
+    SEQUENCE {
+        portsBreakoutPortPhysicalPortNumber BreakablePhyPortNum,
+        portsBreakoutPortEnabled TruthValue,
+        portsBreakoutPortMap BreakdownMaps,
+        portsBreakoutPortRowstatus RowStatus
+    }
+
+portsBreakoutPortPhysicalPortNumber OBJECT-TYPE
+    SYNTAX      BreakablePhyPortNum
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsBreakoutPortEntry 1 }
+
+portsBreakoutPortEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsBreakoutPortEntry 2 }
+
+portsBreakoutPortMap OBJECT-TYPE
+    SYNTAX      BreakdownMaps
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsBreakoutPortEntry 3 }
+
+portsBreakoutPortRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsBreakoutPortEntry 5 }
+
+portsPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Port configuration and status"
+    ::= { ports 4 }
+
+portsPortEntry OBJECT-TYPE
+    SYNTAX      PortsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED portsPortLogicalPortNumber }
+        ::= { portsPortTable 1 }
+
+PortsPortEntry ::=
+    SEQUENCE {
+        portsPortLogicalPortNumber LogicalPortNum,
+        portsPortStatusMtu ConfdString,
+        portsPortStatusLinkStatus LinkStatusType,
+        portsPortSpeed PortSpeedConfig,
+        portsPortFec FecStatus,
+        portsPortVlan UnsignedShort,
+        portsPortIngressAction INTEGER,
+        portsPortEgressAction INTEGER,
+        portsPortMode PortRxTxModes,
+        portsPortTxDescription String,
+        portsPortRxDescription String,
+        portsPortSetControlledPorts String,
+        portsPortTxLaser INTEGER,
+        portsPortDoubleTag INTEGER,
+        portsPortPrbsType PrbsPolynomial,
+        portsPortPrbsEnabled TruthValue,
+        portsPortMplsRemove INTEGER,
+        portsPortRxTimestamp INTEGER,
+        portsPortRxTimestampId Unsigned32,
+        portsPortTxTimestamp INTEGER,
+        portsPortTxTimestampId Unsigned32,
+        portsPortPortName String,
+        portsPortAdmin INTEGER,
+        portsPortDescription String,
+        portsPortUtilizationAlertsRxRaiseThreshold Unsigned32,
+        portsPortUtilizationAlertsRxClearThreshold Unsigned32,
+        portsPortUtilizationAlertsRxAdmin INTEGER,
+        portsPortUtilizationAlertsTxRaiseThreshold Unsigned32,
+        portsPortUtilizationAlertsTxClearThreshold Unsigned32,
+        portsPortUtilizationAlertsTxAdmin INTEGER,
+        portsPortRowstatus RowStatus
+    }
+
+portsPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portsPortEntry 1 }
+
+portsPortStatusMtu OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port's MTU"
+    ::= { portsPortEntry 2 }
+
+portsPortStatusLinkStatus OBJECT-TYPE
+    SYNTAX      LinkStatusType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port's link status"
+    ::= { portsPortEntry 3 }
+
+portsPortSpeed OBJECT-TYPE
+    SYNTAX      PortSpeedConfig
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's configured speed"
+    DEFVAL { speed10G }
+    ::= { portsPortEntry 4 }
+
+portsPortFec OBJECT-TYPE
+    SYNTAX      FecStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's configured fec"
+    DEFVAL { disable }
+    ::= { portsPortEntry 5 }
+
+portsPortVlan OBJECT-TYPE
+    SYNTAX      UnsignedShort (1 .. 4094)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Vlan tag to use according to action"
+    ::= { portsPortEntry 6 }
+
+portsPortIngressAction OBJECT-TYPE
+    SYNTAX      INTEGER {no-action(0),add(1),replace(2),remove(3)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Action to take on ingress traffic"
+    ::= { portsPortEntry 7 }
+
+portsPortEgressAction OBJECT-TYPE
+    SYNTAX      INTEGER {no-action(0),remove(3)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Action to take on egress traffic"
+    ::= { portsPortEntry 8 }
+
+portsPortMode OBJECT-TYPE
+    SYNTAX      PortRxTxModes
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's rx/tx mode"
+    DEFVAL { normal }
+    ::= { portsPortEntry 9 }
+
+portsPortTxDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's TX-description (simplex mode)"
+    ::= { portsPortEntry 10 }
+
+portsPortRxDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's RX-description (simplex mode)"
+    ::= { portsPortEntry 11 }
+
+portsPortSetControlledPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's controlled ports"
+    ::= { portsPortEntry 12 }
+
+portsPortTxLaser OBJECT-TYPE
+    SYNTAX      INTEGER {on(1),off(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's transceiver tx laser mode"
+    ::= { portsPortEntry 13 }
+
+portsPortDoubleTag OBJECT-TYPE
+    SYNTAX      INTEGER {port-double-tag-1(1),port-double-tag-2(2),port-double-tag-3(3)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's ethertype for double-tag"
+    ::= { portsPortEntry 14 }
+
+portsPortPrbsType OBJECT-TYPE
+    SYNTAX      PrbsPolynomial
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set PRBS polynom type"
+    DEFVAL { prbs7 }
+    ::= { portsPortEntry 15 }
+
+portsPortPrbsEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsPortEntry 16 }
+
+portsPortMplsRemove OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "MPLS header stripping Enable/Disable"
+    ::= { portsPortEntry 17 }
+
+portsPortRxTimestamp OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Insert timestamp upon packet receive"
+    ::= { portsPortEntry 18 }
+
+portsPortRxTimestampId OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 8388607)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Insert ID into RX timestamp trailer"
+    ::= { portsPortEntry 19 }
+
+portsPortTxTimestamp OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Insert timestamp upon packet transmit"
+    ::= { portsPortEntry 20 }
+
+portsPortTxTimestampId OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 8388607)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Insert ID into TX timestamp trailer"
+    ::= { portsPortEntry 21 }
+
+portsPortPortName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 48))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's name"
+    ::= { portsPortEntry 22 }
+
+portsPortAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Administrative status"
+    ::= { portsPortEntry 23 }
+
+portsPortDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 140))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port's description"
+    ::= { portsPortEntry 24 }
+
+portsPortUtilizationAlertsRxRaiseThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 100)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Raise utilization alert when crossing this threshold upward (defined in percentage of the port's maximal bitrate)"
+    ::= { portsPortEntry 25 }
+
+portsPortUtilizationAlertsRxClearThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 100)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Clear utilization alert when crossing this threshold downward (defined in percentage of the port's maximal bitrate)"
+    ::= { portsPortEntry 26 }
+
+portsPortUtilizationAlertsRxAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Enable/disable alarm"
+    ::= { portsPortEntry 27 }
+
+portsPortUtilizationAlertsTxRaiseThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 100)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Raise utilization alert when crossing this threshold upward (defined in percentage of the port's maximal bitrate)"
+    ::= { portsPortEntry 28 }
+
+portsPortUtilizationAlertsTxClearThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 100)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Clear utilization alert when crossing this threshold downward (defined in percentage of the port's maximal bitrate)"
+    ::= { portsPortEntry 29 }
+
+portsPortUtilizationAlertsTxAdmin OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Enable/disable alarm"
+    ::= { portsPortEntry 30 }
+
+portsPortRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsPortEntry 33 }
+
+portsGroupTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortsGroupEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Port group"
+    ::= { ports 5 }
+
+portsGroupEntry OBJECT-TYPE
+    SYNTAX      PortsGroupEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { IMPLIED portsGroupName }
+        ::= { portsGroupTable 1 }
+
+PortsGroupEntry ::=
+    SEQUENCE {
+        portsGroupName String,
+        portsGroupDescription String,
+        portsGroupPorts String,
+        portsGroupUsedByLbgs String,
+        portsGroupUsedByFilters String,
+        portsGroupUsedByHa String,
+        portsGroupRowstatus RowStatus
+    }
+
+portsGroupName OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 48))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Ports group name"
+    ::= { portsGroupEntry 1 }
+
+portsGroupDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (1 .. 128))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Port group description"
+    ::= { portsGroupEntry 2 }
+
+portsGroupPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Ports in this group"
+    ::= { portsGroupEntry 3 }
+
+portsGroupUsedByLbgs OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "List of lb groups using this entry"
+    ::= { portsGroupEntry 4 }
+
+portsGroupUsedByFilters OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "List of filters using this entry"
+    ::= { portsGroupEntry 5 }
+
+portsGroupUsedByHa OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Used by HA"
+    ::= { portsGroupEntry 6 }
+
+portsGroupRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsGroupEntry 7 }
+
+portStatisticsPacketSizePortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsPacketSizePortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPacketSize 1 }
+
+portStatisticsPacketSizePortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsPacketSizePortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsPacketSizePortOrder }
+        ::= { portStatisticsPacketSizePortTable 1 }
+
+PortStatisticsPacketSizePortEntry ::=
+    SEQUENCE {
+        portStatisticsPacketSizePortLogicalPortNumber LogicalPortNum,
+        portStatisticsPacketSizePortOrder Unsigned32,
+        portStatisticsPacketSizePortRxUndersized Counter64,
+        portStatisticsPacketSizePortRx64 Counter64,
+        portStatisticsPacketSizePortTx64 Counter64,
+        portStatisticsPacketSizePortRx65127 Counter64,
+        portStatisticsPacketSizePortTx65127 Counter64,
+        portStatisticsPacketSizePortRx128255 Counter64,
+        portStatisticsPacketSizePortTx128255 Counter64,
+        portStatisticsPacketSizePortRx256511 Counter64,
+        portStatisticsPacketSizePortTx256511 Counter64,
+        portStatisticsPacketSizePortRx5121023 Counter64,
+        portStatisticsPacketSizePortTx5121023 Counter64,
+        portStatisticsPacketSizePortRxOversized Counter64,
+        portStatisticsPacketSizePortRx10241518 Counter64,
+        portStatisticsPacketSizePortTx10241518 Counter64,
+        portStatisticsPacketSizePortRx15192047 Counter64,
+        portStatisticsPacketSizePortTx15192047 Counter64,
+        portStatisticsPacketSizePortRx20484095 Counter64,
+        portStatisticsPacketSizePortTx20484095 Counter64,
+        portStatisticsPacketSizePortRx40969216 Counter64,
+        portStatisticsPacketSizePortTx40969216 Counter64,
+        portStatisticsPacketSizePortRx921716830 Counter64,
+        portStatisticsPacketSizePortTx921716830 Counter64,
+        portStatisticsPacketSizePortTxOversized Counter64
+    }
+
+portStatisticsPacketSizePortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsPacketSizePortEntry 1 }
+
+portStatisticsPacketSizePortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPacketSizePortEntry 2 }
+
+portStatisticsPacketSizePortRxUndersized OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received undersized"
+    ::= { portStatisticsPacketSizePortEntry 3 }
+
+portStatisticsPacketSizePortRx64 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 64 bytes"
+    ::= { portStatisticsPacketSizePortEntry 4 }
+
+portStatisticsPacketSizePortTx64 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 64 bytes"
+    ::= { portStatisticsPacketSizePortEntry 5 }
+
+portStatisticsPacketSizePortRx65127 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 64-127 bytes"
+    ::= { portStatisticsPacketSizePortEntry 6 }
+
+portStatisticsPacketSizePortTx65127 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 64-127 bytes"
+    ::= { portStatisticsPacketSizePortEntry 7 }
+
+portStatisticsPacketSizePortRx128255 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 128-255 bytes"
+    ::= { portStatisticsPacketSizePortEntry 8 }
+
+portStatisticsPacketSizePortTx128255 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 128-255 bytes"
+    ::= { portStatisticsPacketSizePortEntry 9 }
+
+portStatisticsPacketSizePortRx256511 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 256-511 bytes"
+    ::= { portStatisticsPacketSizePortEntry 10 }
+
+portStatisticsPacketSizePortTx256511 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 256-511 bytes"
+    ::= { portStatisticsPacketSizePortEntry 11 }
+
+portStatisticsPacketSizePortRx5121023 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 512-1023 bytes"
+    ::= { portStatisticsPacketSizePortEntry 12 }
+
+portStatisticsPacketSizePortTx5121023 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 512-1023 bytes"
+    ::= { portStatisticsPacketSizePortEntry 13 }
+
+portStatisticsPacketSizePortRxOversized OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received oversized"
+    ::= { portStatisticsPacketSizePortEntry 14 }
+
+portStatisticsPacketSizePortRx10241518 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 1024-1518 bytes"
+    ::= { portStatisticsPacketSizePortEntry 15 }
+
+portStatisticsPacketSizePortTx10241518 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 1024-1518 bytes"
+    ::= { portStatisticsPacketSizePortEntry 16 }
+
+portStatisticsPacketSizePortRx15192047 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 1519-2047 bytes"
+    ::= { portStatisticsPacketSizePortEntry 17 }
+
+portStatisticsPacketSizePortTx15192047 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 1519-2047 bytes"
+    ::= { portStatisticsPacketSizePortEntry 18 }
+
+portStatisticsPacketSizePortRx20484095 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 2048-4095 bytes"
+    ::= { portStatisticsPacketSizePortEntry 19 }
+
+portStatisticsPacketSizePortTx20484095 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 2048-4095 bytes"
+    ::= { portStatisticsPacketSizePortEntry 20 }
+
+portStatisticsPacketSizePortRx40969216 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 4096-9216 bytes"
+    ::= { portStatisticsPacketSizePortEntry 21 }
+
+portStatisticsPacketSizePortTx40969216 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 4096-9216 bytes"
+    ::= { portStatisticsPacketSizePortEntry 22 }
+
+portStatisticsPacketSizePortRx921716830 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received 9217-16830 bytes"
+    ::= { portStatisticsPacketSizePortEntry 23 }
+
+portStatisticsPacketSizePortTx921716830 OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted 9217-16830 bytes"
+    ::= { portStatisticsPacketSizePortEntry 24 }
+
+portStatisticsPacketSizePortTxOversized OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted oversized"
+    ::= { portStatisticsPacketSizePortEntry 25 }
+
+portStatisticsTrafficTypesPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsTrafficTypesPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsTrafficTypes 1 }
+
+portStatisticsTrafficTypesPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsTrafficTypesPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsTrafficTypesPortOrder }
+        ::= { portStatisticsTrafficTypesPortTable 1 }
+
+PortStatisticsTrafficTypesPortEntry ::=
+    SEQUENCE {
+        portStatisticsTrafficTypesPortLogicalPortNumber LogicalPortNum,
+        portStatisticsTrafficTypesPortOrder Unsigned32,
+        portStatisticsTrafficTypesPortRxUnknown Counter64,
+        portStatisticsTrafficTypesPortRxUcst Counter64,
+        portStatisticsTrafficTypesPortTxUcst Counter64,
+        portStatisticsTrafficTypesPortRxBcst Counter64,
+        portStatisticsTrafficTypesPortTxBcst Counter64,
+        portStatisticsTrafficTypesPortRxMcst Counter64,
+        portStatisticsTrafficTypesPortTxMcst Counter64,
+        portStatisticsTrafficTypesPortRxIpv6Mcst Counter64,
+        portStatisticsTrafficTypesPortTxIpv6Mcst Counter64
+    }
+
+portStatisticsTrafficTypesPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsTrafficTypesPortEntry 1 }
+
+portStatisticsTrafficTypesPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsTrafficTypesPortEntry 2 }
+
+portStatisticsTrafficTypesPortRxUnknown OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received unknown"
+    ::= { portStatisticsTrafficTypesPortEntry 3 }
+
+portStatisticsTrafficTypesPortRxUcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received unicast"
+    ::= { portStatisticsTrafficTypesPortEntry 4 }
+
+portStatisticsTrafficTypesPortTxUcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted unicast"
+    ::= { portStatisticsTrafficTypesPortEntry 5 }
+
+portStatisticsTrafficTypesPortRxBcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received broadcast"
+    ::= { portStatisticsTrafficTypesPortEntry 6 }
+
+portStatisticsTrafficTypesPortTxBcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted broadcast"
+    ::= { portStatisticsTrafficTypesPortEntry 7 }
+
+portStatisticsTrafficTypesPortRxMcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received multicast"
+    ::= { portStatisticsTrafficTypesPortEntry 8 }
+
+portStatisticsTrafficTypesPortTxMcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted multicast"
+    ::= { portStatisticsTrafficTypesPortEntry 9 }
+
+portStatisticsTrafficTypesPortRxIpv6Mcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsTrafficTypesPortEntry 10 }
+
+portStatisticsTrafficTypesPortTxIpv6Mcst OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsTrafficTypesPortEntry 11 }
+
+portStatisticsErrorsPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsErrorsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsErrors 1 }
+
+portStatisticsErrorsPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsErrorsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsErrorsPortOrder }
+        ::= { portStatisticsErrorsPortTable 1 }
+
+PortStatisticsErrorsPortEntry ::=
+    SEQUENCE {
+        portStatisticsErrorsPortLogicalPortNumber LogicalPortNum,
+        portStatisticsErrorsPortOrder Unsigned32,
+        portStatisticsErrorsPortRxErrPkts Counter64,
+        portStatisticsErrorsPortTxErrPkts Counter64,
+        portStatisticsErrorsPortRxIpErrPkts Counter64,
+        portStatisticsErrorsPortRxJabber Counter64,
+        portStatisticsErrorsPortRxDropEvents Counter64,
+        portStatisticsErrorsPortRxFragments Counter64,
+        portStatisticsErrorsPortRxCollisions Counter64,
+        portStatisticsErrorsPortRxDeferredCollisions Counter64,
+        portStatisticsErrorsPortRxLateCollisions Counter64,
+        portStatisticsErrorsPortRxExcessiveCollisions Counter64,
+        portStatisticsErrorsPortRxAlignErr Counter64,
+        portStatisticsErrorsPortRxFcsErr Counter64,
+        portStatisticsErrorsPortRxMacErr Counter64,
+        portStatisticsErrorsPortTxMacErr Counter64,
+        portStatisticsErrorsPortRxCarrierSenseErr Counter64,
+        portStatisticsErrorsPortRxFrameTooLong Counter64,
+        portStatisticsErrorsPortRxSymbolErr Counter64,
+        portStatisticsErrorsPortRxUnknownOpcode Counter64
+    }
+
+portStatisticsErrorsPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsErrorsPortEntry 1 }
+
+portStatisticsErrorsPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsErrorsPortEntry 2 }
+
+portStatisticsErrorsPortRxErrPkts OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received errors"
+    ::= { portStatisticsErrorsPortEntry 3 }
+
+portStatisticsErrorsPortTxErrPkts OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received errors"
+    ::= { portStatisticsErrorsPortEntry 4 }
+
+portStatisticsErrorsPortRxIpErrPkts OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received IP errors"
+    ::= { portStatisticsErrorsPortEntry 5 }
+
+portStatisticsErrorsPortRxJabber OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received jabber"
+    ::= { portStatisticsErrorsPortEntry 6 }
+
+portStatisticsErrorsPortRxDropEvents OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received and dropped"
+    ::= { portStatisticsErrorsPortEntry 7 }
+
+portStatisticsErrorsPortRxFragments OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received fragments"
+    ::= { portStatisticsErrorsPortEntry 8 }
+
+portStatisticsErrorsPortRxCollisions OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received collisions"
+    ::= { portStatisticsErrorsPortEntry 9 }
+
+portStatisticsErrorsPortRxDeferredCollisions OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received deferred collisions"
+    ::= { portStatisticsErrorsPortEntry 10 }
+
+portStatisticsErrorsPortRxLateCollisions OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received late collisions"
+    ::= { portStatisticsErrorsPortEntry 11 }
+
+portStatisticsErrorsPortRxExcessiveCollisions OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received exessive collisions"
+    ::= { portStatisticsErrorsPortEntry 12 }
+
+portStatisticsErrorsPortRxAlignErr OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received alignment errors"
+    ::= { portStatisticsErrorsPortEntry 13 }
+
+portStatisticsErrorsPortRxFcsErr OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received FCS errors"
+    ::= { portStatisticsErrorsPortEntry 14 }
+
+portStatisticsErrorsPortRxMacErr OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received MAC errors"
+    ::= { portStatisticsErrorsPortEntry 15 }
+
+portStatisticsErrorsPortTxMacErr OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Trasnmit MAC errors"
+    ::= { portStatisticsErrorsPortEntry 16 }
+
+portStatisticsErrorsPortRxCarrierSenseErr OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received carrier sense errors"
+    ::= { portStatisticsErrorsPortEntry 17 }
+
+portStatisticsErrorsPortRxFrameTooLong OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received long frames errors"
+    ::= { portStatisticsErrorsPortEntry 18 }
+
+portStatisticsErrorsPortRxSymbolErr OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received symbol errors"
+    ::= { portStatisticsErrorsPortEntry 19 }
+
+portStatisticsErrorsPortRxUnknownOpcode OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received unknown opcode"
+    ::= { portStatisticsErrorsPortEntry 20 }
+
+portStatisticsUtilizationPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsUtilizationPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsUtilization 1 }
+
+portStatisticsUtilizationPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsUtilizationPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsUtilizationPortOrder }
+        ::= { portStatisticsUtilizationPortTable 1 }
+
+PortStatisticsUtilizationPortEntry ::=
+    SEQUENCE {
+        portStatisticsUtilizationPortLogicalPortNumber LogicalPortNum,
+        portStatisticsUtilizationPortOrder Unsigned32,
+        portStatisticsUtilizationPortRxStatus INTEGER,
+        portStatisticsUtilizationPortRxLastFailureTimestamp String,
+        portStatisticsUtilizationPortRxUtilPercentsAvg5min ConfdString,
+        portStatisticsUtilizationPortRxUtilBpsAvg5min ConfdString,
+        portStatisticsUtilizationPortRxUtilPercentsCurrent1sec ConfdString,
+        portStatisticsUtilizationPortRxUtilBpsCurrent1sec ConfdString,
+        portStatisticsUtilizationPortRxUtilPpsCurrent1sec ConfdString,
+        portStatisticsUtilizationPortRxUtilTimestamp String,
+        portStatisticsUtilizationPortRxUtilPeakPercents ConfdString,
+        portStatisticsUtilizationPortRxUtilPeakBps ConfdString,
+        portStatisticsUtilizationPortRxUtilPeakTimestamp String,
+        portStatisticsUtilizationPortTxStatus INTEGER,
+        portStatisticsUtilizationPortTxLastFailureTimestamp String,
+        portStatisticsUtilizationPortTxUtilPercentsAvg5min ConfdString,
+        portStatisticsUtilizationPortTxUtilBpsAvg5min ConfdString,
+        portStatisticsUtilizationPortTxUtilPercentsCurrent1sec ConfdString,
+        portStatisticsUtilizationPortTxUtilBpsCurrent1sec ConfdString,
+        portStatisticsUtilizationPortTxUtilPpsCurrent1sec ConfdString,
+        portStatisticsUtilizationPortTxUtilTimestamp String,
+        portStatisticsUtilizationPortTxUtilPeakPercents ConfdString,
+        portStatisticsUtilizationPortTxUtilPeakBps ConfdString,
+        portStatisticsUtilizationPortTxUtilPeakTimestamp String
+    }
+
+portStatisticsUtilizationPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsUtilizationPortEntry 1 }
+
+portStatisticsUtilizationPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsUtilizationPortEntry 2 }
+
+portStatisticsUtilizationPortRxStatus OBJECT-TYPE
+    SYNTAX      INTEGER {ok(0),alarm(1),unknown(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "current utilization alert status"
+    ::= { portStatisticsUtilizationPortEntry 3 }
+
+portStatisticsUtilizationPortRxLastFailureTimestamp OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 18))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time and date of last failure"
+    ::= { portStatisticsUtilizationPortEntry 4 }
+
+portStatisticsUtilizationPortRxUtilPercentsAvg5min OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Utilization percentage average out of maximum rate for the last 5 minutes"
+    ::= { portStatisticsUtilizationPortEntry 5 }
+
+portStatisticsUtilizationPortRxUtilBpsAvg5min OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Bandwidth utilization average in bits per second for the last 5 minutes"
+    ::= { portStatisticsUtilizationPortEntry 6 }
+
+portStatisticsUtilizationPortRxUtilPercentsCurrent1sec OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current utilization percentage average out of maximum rate"
+    ::= { portStatisticsUtilizationPortEntry 7 }
+
+portStatisticsUtilizationPortRxUtilBpsCurrent1sec OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "current bandwidth utilization in bits per second "
+    ::= { portStatisticsUtilizationPortEntry 8 }
+
+portStatisticsUtilizationPortRxUtilPpsCurrent1sec OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current bandwidth utilization in packets per second"
+    ::= { portStatisticsUtilizationPortEntry 9 }
+
+portStatisticsUtilizationPortRxUtilTimestamp OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 18))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time and date of bandwidth utilization"
+    ::= { portStatisticsUtilizationPortEntry 10 }
+
+portStatisticsUtilizationPortRxUtilPeakPercents OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Peak bandwidth utilization percentage out of maximum rate"
+    ::= { portStatisticsUtilizationPortEntry 11 }
+
+portStatisticsUtilizationPortRxUtilPeakBps OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Peak bandwidth utilization in bits per second"
+    ::= { portStatisticsUtilizationPortEntry 12 }
+
+portStatisticsUtilizationPortRxUtilPeakTimestamp OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 18))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time and date of peak bandwidth utilization"
+    ::= { portStatisticsUtilizationPortEntry 13 }
+
+portStatisticsUtilizationPortTxStatus OBJECT-TYPE
+    SYNTAX      INTEGER {ok(0),alarm(1),unknown(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "current utilization alert status"
+    ::= { portStatisticsUtilizationPortEntry 14 }
+
+portStatisticsUtilizationPortTxLastFailureTimestamp OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 18))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time and date of last failure"
+    ::= { portStatisticsUtilizationPortEntry 15 }
+
+portStatisticsUtilizationPortTxUtilPercentsAvg5min OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Utilization percentage average out of maximum rate for the last 5 minutes"
+    ::= { portStatisticsUtilizationPortEntry 16 }
+
+portStatisticsUtilizationPortTxUtilBpsAvg5min OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Bandwidth utilization average in bits per second for the last 5 minutes"
+    ::= { portStatisticsUtilizationPortEntry 17 }
+
+portStatisticsUtilizationPortTxUtilPercentsCurrent1sec OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current utilization percentage average out of maximum rate"
+    ::= { portStatisticsUtilizationPortEntry 18 }
+
+portStatisticsUtilizationPortTxUtilBpsCurrent1sec OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "current bandwidth utilization in bits per second "
+    ::= { portStatisticsUtilizationPortEntry 19 }
+
+portStatisticsUtilizationPortTxUtilPpsCurrent1sec OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Current bandwidth utilization in packets per second"
+    ::= { portStatisticsUtilizationPortEntry 20 }
+
+portStatisticsUtilizationPortTxUtilTimestamp OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 18))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time and date of bandwidth utilization"
+    ::= { portStatisticsUtilizationPortEntry 21 }
+
+portStatisticsUtilizationPortTxUtilPeakPercents OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Peak bandwidth utilization percentage out of maximum rate"
+    ::= { portStatisticsUtilizationPortEntry 22 }
+
+portStatisticsUtilizationPortTxUtilPeakBps OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Peak bandwidth utilization in bits per second"
+    ::= { portStatisticsUtilizationPortEntry 23 }
+
+portStatisticsUtilizationPortTxUtilPeakTimestamp OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 18))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Time and date of peak bandwidth utilization"
+    ::= { portStatisticsUtilizationPortEntry 24 }
+
+portStatisticsSummaryPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsSummaryPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsSummary 1 }
+
+portStatisticsSummaryPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsSummaryPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsSummaryPortOrder }
+        ::= { portStatisticsSummaryPortTable 1 }
+
+PortStatisticsSummaryPortEntry ::=
+    SEQUENCE {
+        portStatisticsSummaryPortLogicalPortNumber LogicalPortNum,
+        portStatisticsSummaryPortOrder Unsigned32,
+        portStatisticsSummaryPortRxOctets Counter64,
+        portStatisticsSummaryPortTxOctets Counter64,
+        portStatisticsSummaryPortRxPackets Counter64,
+        portStatisticsSummaryPortTxPackets Counter64,
+        portStatisticsSummaryPortRxDiscards Counter64,
+        portStatisticsSummaryPortTxDiscards Counter64
+    }
+
+portStatisticsSummaryPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsSummaryPortEntry 1 }
+
+portStatisticsSummaryPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsSummaryPortEntry 2 }
+
+portStatisticsSummaryPortRxOctets OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received octets"
+    ::= { portStatisticsSummaryPortEntry 3 }
+
+portStatisticsSummaryPortTxOctets OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted octets"
+    ::= { portStatisticsSummaryPortEntry 4 }
+
+portStatisticsSummaryPortRxPackets OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received packets"
+    ::= { portStatisticsSummaryPortEntry 5 }
+
+portStatisticsSummaryPortTxPackets OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted packets"
+    ::= { portStatisticsSummaryPortEntry 6 }
+
+portStatisticsSummaryPortRxDiscards OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Received discards"
+    ::= { portStatisticsSummaryPortEntry 7 }
+
+portStatisticsSummaryPortTxDiscards OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Transmitted discards"
+    ::= { portStatisticsSummaryPortEntry 8 }
+
+portStatisticsPrbsPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsPrbsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPrbs 1 }
+
+portStatisticsPrbsPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsPrbsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsPrbsPortOrder }
+        ::= { portStatisticsPrbsPortTable 1 }
+
+PortStatisticsPrbsPortEntry ::=
+    SEQUENCE {
+        portStatisticsPrbsPortLogicalPortNumber LogicalPortNum,
+        portStatisticsPrbsPortOrder Unsigned32,
+        portStatisticsPrbsPortPrbsChannels Unsigned32
+    }
+
+portStatisticsPrbsPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsPrbsPortEntry 1 }
+
+portStatisticsPrbsPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPrbsPortEntry 2 }
+
+portStatisticsPrbsPortPrbsChannels OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of prbs channels"
+    ::= { portStatisticsPrbsPortEntry 3 }
+
+portStatisticsPrbsPortPrbsStatTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsPrbsPortPrbsStatEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portsMib 4 }
+
+portStatisticsPrbsPortPrbsStatEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsPrbsPortPrbsStatEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsPrbsPortOrder, portStatisticsPrbsPortPrbsStatChanId }
+        ::= { portStatisticsPrbsPortPrbsStatTable 1 }
+
+PortStatisticsPrbsPortPrbsStatEntry ::=
+    SEQUENCE {
+        portStatisticsPrbsPortPrbsStatChanId Unsigned32,
+        portStatisticsPrbsPortPrbsStatLogicalPortNumber String,
+        portStatisticsPrbsPortPrbsStatPortStringToDisplay String,
+        portStatisticsPrbsPortPrbsStatPrbsState String,
+        portStatisticsPrbsPortPrbsStatPrbsErrorBits Counter64,
+        portStatisticsPrbsPortPrbsStatPrbsLostEvent Unsigned32,
+        portStatisticsPrbsPortPrbsStatPrbsErrorBitsRate String,
+        portStatisticsPrbsPortPrbsStatPrbsLastFailureTimestamp String,
+        portStatisticsPrbsPortPrbsStatPrbsLastErrorTimestamp String,
+        portStatisticsPrbsPortPrbsStatPrbsRunTime String
+    }
+
+portStatisticsPrbsPortPrbsStatChanId OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPrbsPortPrbsStatEntry 1 }
+
+portStatisticsPrbsPortPrbsStatLogicalPortNumber OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPrbsPortPrbsStatEntry 2 }
+
+portStatisticsPrbsPortPrbsStatPortStringToDisplay OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsPrbsPortPrbsStatEntry 3 }
+
+portStatisticsPrbsPortPrbsStatPrbsState OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream error state"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 4 }
+
+portStatisticsPrbsPortPrbsStatPrbsErrorBits OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream error bits counter"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 5 }
+
+portStatisticsPrbsPortPrbsStatPrbsLostEvent OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream lost events counter"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 6 }
+
+portStatisticsPrbsPortPrbsStatPrbsErrorBitsRate OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream error bits rate"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 7 }
+
+portStatisticsPrbsPortPrbsStatPrbsLastFailureTimestamp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream last loss time"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 8 }
+
+portStatisticsPrbsPortPrbsStatPrbsLastErrorTimestamp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream last error time"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 9 }
+
+portStatisticsPrbsPortPrbsStatPrbsRunTime OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream test duration time"
+    ::= { portStatisticsPrbsPortPrbsStatEntry 10 }
+
+portStatisticsFecPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsFecPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsFec 1 }
+
+portStatisticsFecPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsFecPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsFecPortOrder }
+        ::= { portStatisticsFecPortTable 1 }
+
+PortStatisticsFecPortEntry ::=
+    SEQUENCE {
+        portStatisticsFecPortLogicalPortNumber LogicalPortNum,
+        portStatisticsFecPortOrder Unsigned32,
+        portStatisticsFecPortFecCorrected Counter64,
+        portStatisticsFecPortFecUncorrected Counter64
+    }
+
+portStatisticsFecPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsFecPortEntry 1 }
+
+portStatisticsFecPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsFecPortEntry 2 }
+
+portStatisticsFecPortFecCorrected OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream FEC corrected codewords"
+    ::= { portStatisticsFecPortEntry 3 }
+
+portStatisticsFecPortFecUncorrected OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Pseudo Random Bit Stream FEC uncorrected codewords"
+    ::= { portStatisticsFecPortEntry 4 }
+
+portStatisticsActionsPortTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF PortStatisticsActionsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsActions 1 }
+
+portStatisticsActionsPortEntry OBJECT-TYPE
+    SYNTAX      PortStatisticsActionsPortEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { portStatisticsActionsPortOrder }
+        ::= { portStatisticsActionsPortTable 1 }
+
+PortStatisticsActionsPortEntry ::=
+    SEQUENCE {
+        portStatisticsActionsPortLogicalPortNumber LogicalPortNum,
+        portStatisticsActionsPortOrder Unsigned32,
+        portStatisticsActionsPortMplsRemove Counter64,
+        portStatisticsActionsPortSlice Counter64
+    }
+
+portStatisticsActionsPortLogicalPortNumber OBJECT-TYPE
+    SYNTAX      LogicalPortNum
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Port number"
+    ::= { portStatisticsActionsPortEntry 1 }
+
+portStatisticsActionsPortOrder OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsActionsPortEntry 2 }
+
+portStatisticsActionsPortMplsRemove OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsActionsPortEntry 3 }
+
+portStatisticsActionsPortSlice OBJECT-TYPE
+    SYNTAX      Counter64
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { portStatisticsActionsPortEntry 4 }
+
+transceiversDdmTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF TransceiversDdmEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceivers 1 }
+
+transceiversDdmEntry OBJECT-TYPE
+    SYNTAX      TransceiversDdmEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { transceiversDdmQsfpId }
+        ::= { transceiversDdmTable 1 }
+
+TransceiversDdmEntry ::=
+    SEQUENCE {
+        transceiversDdmQsfpId QsfpId,
+        transceiversDdmSfpPresent SfpPresentType,
+        transceiversDdmSfpTrxId String,
+        transceiversDdmSfpTransceiver Transceiver,
+        transceiversDdmEncodingValues String,
+        transceiversDdmConnectorTypes String,
+        transceiversDdmSfpLength50um UnsignedShort,
+        transceiversDdmSfpLength625um UnsignedShort,
+        transceiversDdmSfpLengthOM3 UnsignedShort,
+        transceiversDdmSfpVendorName String,
+        transceiversDdmSfpVendorOui String,
+        transceiversDdmSfpVendorPN String,
+        transceiversDdmSfpPartRevision String,
+        transceiversDdmSfpVendorSN String,
+        transceiversDdmSfpDateCode String,
+        transceiversDdmSfpSFF8472Rev String,
+        transceiversDdmQsfpTemperatureFlags SfpMonitorStatus,
+        transceiversDdmQsfpVccFlags SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags2 SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags3 SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags4 SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags5 SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags6 SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags7 SfpMonitorStatus,
+        transceiversDdmQsfpRxPowerFlags8 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags2 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags3 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags4 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags5 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags6 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags7 SfpMonitorStatus,
+        transceiversDdmQsfpTxBiasFlags8 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags2 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags3 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags4 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags5 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags6 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags7 SfpMonitorStatus,
+        transceiversDdmQsfpTxPowerFlags8 SfpMonitorStatus,
+        transceiversDdmSfpDiagMonitorType String,
+        transceiversDdmSfpRtTemperature ConfdString,
+        transceiversDdmSfpRtVcc ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent2 ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent3 ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent4 ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent5 ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent6 ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent7 ConfdString,
+        transceiversDdmSfpRtTxBiasCurrent8 ConfdString,
+        transceiversDdmSfpRtRxInputPower ConfdString,
+        transceiversDdmSfpRtRxInputPower2 ConfdString,
+        transceiversDdmSfpRtRxInputPower3 ConfdString,
+        transceiversDdmSfpRtRxInputPower4 ConfdString,
+        transceiversDdmSfpRtRxInputPower5 ConfdString,
+        transceiversDdmSfpRtRxInputPower6 ConfdString,
+        transceiversDdmSfpRtRxInputPower7 ConfdString,
+        transceiversDdmSfpRtRxInputPower8 ConfdString,
+        transceiversDdmSfpRtTxInputPower ConfdString,
+        transceiversDdmSfpRtTxInputPower2 ConfdString,
+        transceiversDdmSfpRtTxInputPower3 ConfdString,
+        transceiversDdmSfpRtTxInputPower4 ConfdString,
+        transceiversDdmSfpRtTxInputPower5 ConfdString,
+        transceiversDdmSfpRtTxInputPower6 ConfdString,
+        transceiversDdmSfpRtTxInputPower7 ConfdString,
+        transceiversDdmSfpRtTxInputPower8 ConfdString,
+        transceiversDdmSfpTrx10GEnetCompliance String,
+        transceiversDdmSfpTrxEnetCompliance String,
+        transceiversDdmSfpTrxFibreLinkLength String,
+        transceiversDdmSfpTrxFibreTechnology String,
+        transceiversDdmSfpTrxSfpCableTechnology String,
+        transceiversDdmSfpTrxFibreTxMedia String,
+        transceiversDdmSfpTrxFibreSpeed String
+    }
+
+transceiversDdmQsfpId OBJECT-TYPE
+    SYNTAX      QsfpId
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 1 }
+
+transceiversDdmSfpPresent OBJECT-TYPE
+    SYNTAX      SfpPresentType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 2 }
+
+transceiversDdmSfpTrxId OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 8))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 3 }
+
+transceiversDdmSfpTransceiver OBJECT-TYPE
+    SYNTAX      Transceiver
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 4 }
+
+transceiversDdmEncodingValues OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 8))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 5 }
+
+transceiversDdmConnectorTypes OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 8))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 6 }
+
+transceiversDdmSfpLength50um OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 7 }
+
+transceiversDdmSfpLength625um OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 8 }
+
+transceiversDdmSfpLengthOM3 OBJECT-TYPE
+    SYNTAX      UnsignedShort
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 9 }
+
+transceiversDdmSfpVendorName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 10 }
+
+transceiversDdmSfpVendorOui OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 11 }
+
+transceiversDdmSfpVendorPN OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 64))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 12 }
+
+transceiversDdmSfpPartRevision OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 13 }
+
+transceiversDdmSfpVendorSN OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 14 }
+
+transceiversDdmSfpDateCode OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 16))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 15 }
+
+transceiversDdmSfpSFF8472Rev OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 256))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 16 }
+
+transceiversDdmQsfpTemperatureFlags OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 17 }
+
+transceiversDdmQsfpVccFlags OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 18 }
+
+transceiversDdmQsfpRxPowerFlags OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 19 }
+
+transceiversDdmQsfpRxPowerFlags2 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 20 }
+
+transceiversDdmQsfpRxPowerFlags3 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 21 }
+
+transceiversDdmQsfpRxPowerFlags4 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 22 }
+
+transceiversDdmQsfpRxPowerFlags5 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 23 }
+
+transceiversDdmQsfpRxPowerFlags6 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 24 }
+
+transceiversDdmQsfpRxPowerFlags7 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 25 }
+
+transceiversDdmQsfpRxPowerFlags8 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 26 }
+
+transceiversDdmQsfpTxBiasFlags OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 27 }
+
+transceiversDdmQsfpTxBiasFlags2 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 28 }
+
+transceiversDdmQsfpTxBiasFlags3 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 29 }
+
+transceiversDdmQsfpTxBiasFlags4 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 30 }
+
+transceiversDdmQsfpTxBiasFlags5 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 31 }
+
+transceiversDdmQsfpTxBiasFlags6 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 32 }
+
+transceiversDdmQsfpTxBiasFlags7 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 33 }
+
+transceiversDdmQsfpTxBiasFlags8 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 34 }
+
+transceiversDdmQsfpTxPowerFlags OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 35 }
+
+transceiversDdmQsfpTxPowerFlags2 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 36 }
+
+transceiversDdmQsfpTxPowerFlags3 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 37 }
+
+transceiversDdmQsfpTxPowerFlags4 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 38 }
+
+transceiversDdmQsfpTxPowerFlags5 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 39 }
+
+transceiversDdmQsfpTxPowerFlags6 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 40 }
+
+transceiversDdmQsfpTxPowerFlags7 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 41 }
+
+transceiversDdmQsfpTxPowerFlags8 OBJECT-TYPE
+    SYNTAX      SfpMonitorStatus
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 42 }
+
+transceiversDdmSfpDiagMonitorType OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 43 }
+
+transceiversDdmSfpRtTemperature OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 44 }
+
+transceiversDdmSfpRtVcc OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 45 }
+
+transceiversDdmSfpRtTxBiasCurrent OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 46 }
+
+transceiversDdmSfpRtTxBiasCurrent2 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 47 }
+
+transceiversDdmSfpRtTxBiasCurrent3 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 48 }
+
+transceiversDdmSfpRtTxBiasCurrent4 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 49 }
+
+transceiversDdmSfpRtTxBiasCurrent5 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 50 }
+
+transceiversDdmSfpRtTxBiasCurrent6 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 51 }
+
+transceiversDdmSfpRtTxBiasCurrent7 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 52 }
+
+transceiversDdmSfpRtTxBiasCurrent8 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 53 }
+
+transceiversDdmSfpRtRxInputPower OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 54 }
+
+transceiversDdmSfpRtRxInputPower2 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 55 }
+
+transceiversDdmSfpRtRxInputPower3 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 56 }
+
+transceiversDdmSfpRtRxInputPower4 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 57 }
+
+transceiversDdmSfpRtRxInputPower5 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 58 }
+
+transceiversDdmSfpRtRxInputPower6 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 59 }
+
+transceiversDdmSfpRtRxInputPower7 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 60 }
+
+transceiversDdmSfpRtRxInputPower8 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 61 }
+
+transceiversDdmSfpRtTxInputPower OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 62 }
+
+transceiversDdmSfpRtTxInputPower2 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 63 }
+
+transceiversDdmSfpRtTxInputPower3 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 64 }
+
+transceiversDdmSfpRtTxInputPower4 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 65 }
+
+transceiversDdmSfpRtTxInputPower5 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 66 }
+
+transceiversDdmSfpRtTxInputPower6 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 67 }
+
+transceiversDdmSfpRtTxInputPower7 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 68 }
+
+transceiversDdmSfpRtTxInputPower8 OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 69 }
+
+transceiversDdmSfpTrx10GEnetCompliance OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 70 }
+
+transceiversDdmSfpTrxEnetCompliance OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 71 }
+
+transceiversDdmSfpTrxFibreLinkLength OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 72 }
+
+transceiversDdmSfpTrxFibreTechnology OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 73 }
+
+transceiversDdmSfpTrxSfpCableTechnology OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 74 }
+
+transceiversDdmSfpTrxFibreTxMedia OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 75 }
+
+transceiversDdmSfpTrxFibreSpeed OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 100))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { transceiversDdmEntry 76 }
+
+END

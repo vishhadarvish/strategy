@@ -1,0 +1,21 @@
+CGS DEFINITIONS ::= BEGIN
+IMPORTS
+    enterprises, MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+;
+
+cgs MODULE-IDENTITY
+    LAST-UPDATED "201607100000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION "This module is the parent module for all cgs applications"
+    REVISION "201607100000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { enterprises 47477 }
+
+END

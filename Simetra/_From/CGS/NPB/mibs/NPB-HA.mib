@@ -1,0 +1,190 @@
+NPB-HA DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+haMib MODULE-IDENTITY
+    LAST-UPDATED "201811270000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201811270000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 6 }
+
+ConfdString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs: and confd: types mapped to strings"
+    SYNTAX      OCTET STRING
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+HaRole ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {primary(0),secondary(1)}
+
+-- High availability
+ha OBJECT IDENTIFIER ::= { haMib 1 }
+
+haTouch OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION ""
+    ::= { ha 1 }
+
+haMode OBJECT-TYPE
+    SYNTAX      INTEGER {active-active(0),active-standby(1)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "High availability mode"
+    ::= { ha 2 }
+
+haFailoverMode OBJECT-TYPE
+    SYNTAX      INTEGER {retain(0),revert(1)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Fail-over mode"
+    ::= { ha 3 }
+
+haHysteresis OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 3600)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Switchover hysteresis time in seconds"
+    ::= { ha 4 }
+
+haVirtualIp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Virtual IP in order to connect the cluster"
+    ::= { ha 5 }
+
+haConflictResolveMode OBJECT-TYPE
+    SYNTAX      INTEGER {use-primary(0),manual(1)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Conflict resolve mode"
+    ::= { ha 6 }
+
+haMonitoredPorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Master-slave elections will be set according to link status of these ports"
+    ::= { ha 7 }
+
+-- High availability status
+haStatus OBJECT IDENTIFIER ::= { ha 8 }
+
+haStatusHaModeUptime OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haStatus 1 }
+
+haOper OBJECT IDENTIFIER ::= { ha 9 }
+
+haOperData OBJECT IDENTIFIER ::= { haOper 1 }
+
+haOperDataStatus OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOperData 1 }
+
+haOperDataRole OBJECT-TYPE
+    SYNTAX      HaRole
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOperData 2 }
+
+haOperDataPeerIp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOperData 3 }
+
+haOperDataClusterId OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOperData 4 }
+
+haOperDataUnsyncedCommits OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOperData 5 }
+
+haOperHaMode OBJECT-TYPE
+    SYNTAX      INTEGER {pending(0),slave(1),master(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 2 }
+
+haOperDetectedPeerIp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 3 }
+
+haOperPeerStatus OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 4 }
+
+haOperDataReplicationStatus OBJECT-TYPE
+    SYNTAX      INTEGER {unsynced(0),synced(1),conflict(2)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 5 }
+
+haOperLastSyncTimestamp OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 6 }
+
+haOperHaEnabledActiveStandbySlave OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 7 }
+
+haOperLastHaModeChangedMsg OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { haOper 8 }
+
+END

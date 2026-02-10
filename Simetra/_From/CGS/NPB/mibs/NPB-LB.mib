@@ -1,0 +1,271 @@
+NPB-LB DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE,
+    Integer32, Unsigned32, Counter32, Counter64,
+    Gauge32, IpAddress
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, RowStatus, DateAndTime,
+    TruthValue
+        FROM SNMPv2-TC
+    npb-2e
+        FROM NPB-2E
+;
+
+lbMib MODULE-IDENTITY
+    LAST-UPDATED "201512280000Z"
+    ORGANIZATION "@ORGANIZATION"
+    CONTACT-INFO "@CONTACT-INFO"
+    DESCRIPTION ""
+    REVISION "201512280000Z"
+    DESCRIPTION "@REVISION-DESCRIPTION"
+    ::= { npb-2e 4 }
+
+UnsignedShort ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION "xs:unsignedShort"
+    SYNTAX      Unsigned32 (0 .. 65535)
+
+ConfdString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs: and confd: types mapped to strings"
+    SYNTAX      OCTET STRING
+
+String ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1t"
+    STATUS      current
+    DESCRIPTION "xs:string"
+    SYNTAX      OCTET STRING
+
+HashGtpFiltersNumber ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      Unsigned32 (0 .. 1024)
+
+HashParam ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {lb-5-tuple(1),smac(2),dmac(3),vlan(4),ethertype(5),ip-addr(6),ip-dst-addr(7),ip-protocol-number(8),l4-port(9),l4-dport(10),l2-all(11),mpls(12),gtp-teid(13),ip-src-addr(14),l4-sport(15),in-port(16),lb-4-tuple(17)}
+
+LbAlgo ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {hash(1),round-robin(2),ip-src-addr(3),ip-dst-addr(4),hash-gtp-ip(5),hash-dlb(6),hash-gtp-src(8),hash-gtp-dst(9)}
+
+LbFailover ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {active(1),standby(2)}
+
+LbHashFunc ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {lb-func-crc32(1),lb-func-xor(2)}
+
+LbOverload ::= TEXTUAL-CONVENTION
+    STATUS      current
+    DESCRIPTION ""
+    SYNTAX      INTEGER {drop(1),re-hash(2)}
+
+-- Load-balance configuration
+lb OBJECT IDENTIFIER ::= { lbMib 1 }
+
+-- Load-Balance global parameters setting
+lbHash OBJECT IDENTIFIER ::= { lb 1 }
+
+lbHashHash OBJECT-TYPE
+    SYNTAX      ConfdString
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "List of parameters for port selection hash function"
+    ::= { lbHash 1 }
+
+lbHashSymmetric OBJECT-TYPE
+    SYNTAX      INTEGER {enable(1),disable(2)}
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Interchange source and destination IP addresses and l4 source and destiantion ports in hash to unsure bidirectional flows direct to same port"
+    ::= { lbHash 2 }
+
+lbHashFunc OBJECT-TYPE
+    SYNTAX      LbHashFunc
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Selece hash function"
+    ::= { lbHash 3 }
+
+lbHashDlbMinThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 100)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Dynamic Load Balancing (DLB) minimum threshold in % from port max speed to quantize the exponentially weighted average"
+    ::= { lbHash 4 }
+
+lbHashDlbMaxThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 100)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Dynamic Load Balancing (DLB) maximum threshold in % from port max speed to quantize the exponentially weighted average"
+    ::= { lbHash 5 }
+
+-- Dispaly output lb group and port for given packet
+lbInfo OBJECT IDENTIFIER ::= { lb 2 }
+
+lbGroupTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF LbGroupEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "Configure load balance group"
+    ::= { lb 3 }
+
+lbGroupEntry OBJECT-TYPE
+    SYNTAX      LbGroupEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    INDEX { lbGroupLbId }
+        ::= { lbGroupTable 1 }
+
+LbGroupEntry ::=
+    SEQUENCE {
+        lbGroupLbId Unsigned32,
+        lbGroupDlbInactivity Unsigned32,
+        lbGroupHashGtpSize HashGtpFiltersNumber,
+        lbGroupName String,
+        lbGroupDescription String,
+        lbGroupAlgo LbAlgo,
+        lbGroupOutputs String,
+        lbGroupOverload LbOverload,
+        lbGroupFailoverHoldtime Unsigned32,
+        lbGroupStandby String,
+        lbGroupStandbyFailover LbFailover,
+        lbGroupFailoverAction INTEGER,
+        lbGroupFailoverThreshold Unsigned32,
+        lbGroupShowActivePorts String,
+        lbGroupTouch Unsigned32,
+        lbGroupRowstatus RowStatus
+    }
+
+lbGroupLbId OBJECT-TYPE
+    SYNTAX      Unsigned32 (1 .. 99)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION ""
+    ::= { lbGroupEntry 1 }
+
+lbGroupDlbInactivity OBJECT-TYPE
+    SYNTAX      Unsigned32 (16 .. 32000)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Dlb inactivity duration in microseconds"
+    DEFVAL { 10000 }
+    ::= { lbGroupEntry 2 }
+
+lbGroupHashGtpSize OBJECT-TYPE
+    SYNTAX      HashGtpFiltersNumber
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Number of internal filters to use for gtp hash based"
+    DEFVAL { 0 }
+    ::= { lbGroupEntry 3 }
+
+lbGroupName OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 48))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set load balance group name"
+    ::= { lbGroupEntry 4 }
+
+lbGroupDescription OBJECT-TYPE
+    SYNTAX      String (SIZE (0 .. 128))
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set load balance group description"
+    ::= { lbGroupEntry 5 }
+
+lbGroupAlgo OBJECT-TYPE
+    SYNTAX      LbAlgo
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set load balance group algorithm"
+    DEFVAL { hash }
+    ::= { lbGroupEntry 6 }
+
+lbGroupOutputs OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the port members for this load balance group"
+    ::= { lbGroupEntry 7 }
+
+lbGroupOverload OBJECT-TYPE
+    SYNTAX      LbOverload
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Define lb group behavior when ports link changes to down and no standby port is available."
+    DEFVAL { re-hash }
+    ::= { lbGroupEntry 8 }
+
+lbGroupFailoverHoldtime OBJECT-TYPE
+    SYNTAX      Unsigned32 (0 .. 10000)
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Time in msecs it takes to reinsert previously failed port into lb group"
+    DEFVAL { 0 }
+    ::= { lbGroupEntry 9 }
+
+lbGroupStandby OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the standby ports for this load balance group"
+    ::= { lbGroupEntry 10 }
+
+lbGroupStandbyFailover OBJECT-TYPE
+    SYNTAX      LbFailover
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Standby ports behaviour when original port member has become active again"
+    DEFVAL { standby }
+    ::= { lbGroupEntry 11 }
+
+lbGroupFailoverAction OBJECT-TYPE
+    SYNTAX      INTEGER {nw-bypass(0),nw-drop(1),nw-down(2),per-tool(5),lb-bypass(6),lb-drop(7)}
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Failover action applied when inline-lb-group status has failed"
+    ::= { lbGroupEntry 12 }
+
+lbGroupFailoverThreshold OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION "Set the number of failed tools that trigger the failover action, zero means all tools, default is zero."
+    DEFVAL { 0 }
+    ::= { lbGroupEntry 13 }
+
+lbGroupShowActivePorts OBJECT-TYPE
+    SYNTAX      String
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION ""
+    ::= { lbGroupEntry 14 }
+
+lbGroupTouch OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    DEFVAL { 0 }
+    ::= { lbGroupEntry 15 }
+
+lbGroupRowstatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION ""
+    ::= { lbGroupEntry 17 }
+
+END
