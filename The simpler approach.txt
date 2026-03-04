@@ -1,0 +1,49 @@
+The simpler approach:
+
+Numbers (Integer32, Gauge32, Counter32, Counter64, TimeTicks) → push to OTel/Prometheus
+Non-numbers (OctetString, IpAddress, OID) → log them or store in DB, skip the gauge
+
+Does that match what you actually need, or do you need the string values visible in Grafana?how the values receive in non numbers via snmp08:02Via SNMP, non-numeric values come back as raw bytes in the variable binding. The SNMP library decodes them into a string representation.
+For example with SharpSnmpLib:
+csharpvar result = await Messenger.GetAsync(...);
+
+foreach (var binding in result)
+{
+    var oid   = binding.Id.ToString();        // "1.3.6.1.2.1.1.5.0"
+    var type  = binding.Data.TypeCode;        // SnmpType.OctetString
+    var value = binding.Data.ToString();      // "core-switch-01"
+}
+```
+
+What you get back per type:
+```
+OctetString   → string   "core-switch-01"  or  "GigabitEthernet0/1"
+IpAddress     → string   "192.168.1.1"
+OID           → string   "1.3.6.1.2.1.1.1"
+They are all just .ToString() — a plain string you can log, store in a DB, or display in a table. There is no numeric component at all.
+This confirms the simpler approach: these values have no place in Prometheus. You would handle them in a separate MediatR handler that writes to a database or log, while the OtelMetricHandler only processes the numeric types.
+That is actually a good example of why MediatR is useful here — the same SnmpOidReceived message gets routed to the right handler based on the type, without the listeners needing to know anything about it.if I have on grafana a table and the columns are all the labels and value for numbers,
+can it be applied for non numbers ?08:05Yes — the same table works for non-numbers.
+In Prometheus, raw_value is just a label. Grafana reads labels as columns regardless of what is in them. So a table query like:
+promqlsnmp_oid{agent="192.168.1.1"}
+```
+
+Produces columns for every label plus the numeric value column:
+```
+oid                       human_name        agent          source  raw_value          Value
+─────────────────────────────────────────────────────────────────────────────────────────────
+1.3.6.1.2.1.25.3.3.1.2   hrProcessorLoad   192.168.1.1    poll    73                 73
+1.3.6.1.2.1.1.5.0         sysName           192.168.1.1    poll    core-switch-01     1
+1.3.6.1.2.1.1.4.0         sysContact        192.168.1.1    poll    admin@company.com  1
+The numeric Value column is meaningless for strings — you just hide it in Grafana. The actual information is in raw_value.
+So the approach of Gauge = 1 with the string in raw_value is perfectly usable for a Grafana table. You get everything in one place — numbers and strings — with the same query and the same panel.
+This means you do not need a separate DB handler for non-numeric values. Push everything to OTel, display everything in one table.does for numbers the value is saved on label?08:06No — for numbers the value lives in the gauge itself, not in a label.
+snmp_oid{oid="...", human_name="hrProcessorLoad", raw_value="73"} 73
+                                                  ─────────────   ──
+                                                  label copy      actual gauge value
+The raw_value label for numbers is just a convenience copy of the same value so the table panel can show it in a column without needing to reference the gauge value separately. It is redundant — the real data is the 73 at the end.
+For strings it is the opposite — the gauge value 1 is meaningless, and raw_value is where the actual data lives.
+snmp_oid{oid="...", human_name="sysName", raw_value="core-switch-01"} 1
+                                          ────────────────────────    ─
+                                          actual data                 meaningless
+So raw_value serves different purposes depending on the type — redundant for numbers, essential for strings. If you want to keep the design clean you could drop raw_value for numbers entirely and only set it for non-numeric types. The gauge value is always there for numbers anyway.
